@@ -1,14 +1,7 @@
 {
-  "name": "hrtsjournal-backend",
+  "name": "aissistant-serverless",
   "version": "1.0.0",
-  "description": "Backend server untuk Aissistant Personal Web App",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^4.22.2",
     "mongodb": "^7.2.0"
   }
 }
