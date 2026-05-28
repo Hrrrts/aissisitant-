@@ -6,50 +6,77 @@ let playHistory = [];
 let historyIndex = -1;
 let parsedLyrics = [];
 let currentLyricIndex = -1;
+let allPlaylists = {}; // Buat nyimpen data playlist di memory biar cepet
 
-const playIconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
-const pauseIconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
+const playIconSvg = '▶';
+const pauseIconSvg = '⏸';
 
-// INISIALISASI HALAMAN
 document.addEventListener("DOMContentLoaded", () => {
     loadPlaylistsToHome();
 });
 
-// MEMUAT PLAYLIST KE BERANDA (LAYAR UTAMA)
+// LOGIKA SWIPE BACK (HISTORY API)
+function openFullPlayer() {
+    if(!currentVideoId) return;
+    document.getElementById('fullPlayer').classList.add('open');
+    // Bikin jebakan histori biar swipe back di HP kebaca
+    history.pushState({ modal: 'fullPlayer' }, ''); 
+}
+
+function closeFullPlayer() {
+    document.getElementById('fullPlayer').classList.remove('open');
+}
+
+// Deteksi saat user melakukan swipe back (kembali) di HP Android
+window.addEventListener('popstate', (e) => {
+    const fp = document.getElementById('fullPlayer');
+    if (fp.classList.contains('open')) {
+        fp.classList.remove('open'); // Tutup player tanpa nutup app
+    }
+});
+
+// MEMUAT PLAYLIST (DENGAN GAMBAR)
 async function loadPlaylistsToHome() {
     const grid = document.getElementById('playlistGrid');
     try {
         const response = await fetch('/api/playlist');
-        const playlists = await response.json();
+        allPlaylists = await response.json();
         
-        if (Object.keys(playlists).length === 0) {
-            grid.innerHTML = '<p style="color:#888; font-size:13px; grid-column: span 2;">Belum ada playlist. Cari lagu dan tambahkan!</p>';
+        if (Object.keys(allPlaylists).length === 0) {
+            grid.innerHTML = '<p style="color:#888; font-size:13px; grid-column: span 2;">Belum ada playlist.</p>';
             return;
         }
 
         let html = '';
-        for (let name in playlists) {
+        for (let name in allPlaylists) {
+            const songs = allPlaylists[name];
+            // Ambil gambar dari lagu pertama di playlist tersebut
+            const coverImage = songs.length > 0 ? `https://img.youtube.com/vi/${songs[0].videoId}/hqdefault.jpg` : '';
+            
             html += `
-                <div class="playlist-card" onclick='playFromFolder(${JSON.stringify(playlists[name]).replace(/'/g, "&#39;")})'>
-                    <div class="pl-card-title">${name}</div>
-                    <div class="pl-card-count">${playlists[name].length} Lagu ▶</div>
+                <div class="playlist-card" style="background-image: url('${coverImage}');" onclick='playFromFolder("${name}")'>
+                    <div class="playlist-overlay"></div>
+                    <div class="playlist-info">
+                        <div class="pl-card-title">${name}</div>
+                        <div class="pl-card-count">${songs.length} Lagu</div>
+                    </div>
                 </div>
             `;
         }
         grid.innerHTML = html;
+        checkIfLiked(); // Cek status love kalau lagu lagi muter
     } catch (error) {
-        grid.innerHTML = '<p style="color:#ff4444; font-size:13px; grid-column: span 2;">Gagal memuat database.</p>';
+        grid.innerHTML = '<p style="color:#ff4444; font-size:13px;">Gagal memuat database.</p>';
     }
 }
 
-// MAIN DARI FOLDER PLAYLIST
-function playFromFolder(songs) {
+function playFromFolder(playlistName) {
+    const songs = allPlaylists[playlistName];
     if(!songs || songs.length === 0) return;
-    // Langsung putar lagu pertama dari playlist itu
     selectSong(songs[0].videoId, songs[0].title, songs[0].channel);
 }
 
-// LOGIKA YOUTUBE & PEMUTAR
+// LOGIKA YOUTUBE
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 document.head.appendChild(tag);
@@ -71,20 +98,17 @@ function formatTime(seconds) {
 
 function updatePlayPauseIcons(playing) {
     document.getElementById('playBtn').innerHTML = playing ? pauseIconSvg : playIconSvg;
-    document.getElementById('miniPlayBtn').innerHTML = playing ? '⏸' : '▶';
+    document.getElementById('miniPlayBtn').innerHTML = playing ? pauseIconSvg : playIconSvg;
 }
 
 function onPlayerStateChange(event) {
     const progressBar = document.getElementById('progressBar');
-    
     if (event.data == YT.PlayerState.ENDED) { playNextLogics(); return; }
-
     if (event.data == YT.PlayerState.PLAYING) {
         isPlaying = true;
         updatePlayPauseIcons(true);
         progressBar.max = player.getDuration();
         document.getElementById('durationTime').innerText = formatTime(player.getDuration());
-        
         progressInterval = setInterval(() => {
             const current = player.getCurrentTime();
             progressBar.value = current;
@@ -128,7 +152,6 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     } catch (e) { searchResults.innerHTML = '<div class="result-item">Error jaringan.</div>'; }
 });
 
-// KONTROL PLAY & NEXT
 function togglePlayPause() {
     if (!currentVideoId || !player) return;
     if (isPlaying) player.pauseVideo();
@@ -136,9 +159,7 @@ function togglePlayPause() {
 }
 document.getElementById('playBtn').addEventListener('click', togglePlayPause);
 document.getElementById('miniPlayBtn').addEventListener('click', togglePlayPause);
-
 document.getElementById('nextBtn').addEventListener('click', playNextLogics);
-document.getElementById('miniNextBtn').addEventListener('click', playNextLogics);
 document.getElementById('prevBtn').addEventListener('click', () => {
     if (historyIndex > 0) {
         historyIndex--;
@@ -154,7 +175,6 @@ function playNextLogics() {
         const nextSong = playHistory[historyIndex];
         loadSongToPlayer(nextSong.videoId, nextSong.title, nextSong.channel);
     } else {
-        // Cari vibes serupa
         fetchSimilarVibes();
     }
 }
@@ -163,7 +183,6 @@ async function fetchSimilarVibes() {
     const currentTitle = playHistory[historyIndex].title;
     const currentArtist = playHistory[historyIndex].channel;
     document.getElementById('fullTitle').innerText = "Mencari otomatis...";
-    
     try {
         const res = await fetch('/api/search?q=' + encodeURIComponent(currentTitle + " " + currentArtist + " mix audio"));
         const data = await res.json();
@@ -179,9 +198,8 @@ async function fetchSimilarVibes() {
 async function fetchLyrics(rawTitle, artist) {
     const lyricsBox = document.getElementById('lyricsContainer');
     lyricsBox.style.display = 'block';
-    lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Mencari lirik...</i></div>';
+    lyricsBox.innerHTML = '<div style="margin-top:20%;"><i style="color:#777;">Mencari lirik...</i></div>';
     parsedLyrics = []; currentLyricIndex = -1;
-
     let cleanTitle = rawTitle.replace(/\[.*?\]|\(.*?\)/g, '').trim();
     let searchQuery = cleanTitle.includes('-') ? (cleanTitle.split('-')[1].trim() + ' ' + cleanTitle.split('-')[0].trim()) : (cleanTitle + ' ' + artist);
 
@@ -191,9 +209,9 @@ async function fetchLyrics(rawTitle, artist) {
         if (data && data.length > 0) {
             if (data[0].syncedLyrics) parseSyncedLyrics(data[0].syncedLyrics);
             else if (data[0].plainLyrics) lyricsBox.innerHTML = data[0].plainLyrics.replace(/\n/g, '<br><br>');
-            else lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Lirik tidak ditemukan.</i></div>';
-        } else lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Maaf, lirik tidak ditemukan.</i></div>';
-    } catch (e) { lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Error lirik.</i></div>'; }
+            else lyricsBox.innerHTML = '<div style="margin-top:20%;"><i style="color:#777;">Lirik tidak ditemukan.</i></div>';
+        } else lyricsBox.innerHTML = '<div style="margin-top:20%;"><i style="color:#777;">Maaf, lirik tidak ditemukan.</i></div>';
+    } catch (e) { lyricsBox.innerHTML = '<div style="margin-top:20%;"><i style="color:#777;">Error lirik.</i></div>'; }
 }
 
 function parseSyncedLyrics(lrc) {
@@ -235,33 +253,27 @@ function syncLyrics(currentTime) {
     }
 }
 
-// UPDATE TAMPILAN
-function toggleFullPlayer() {
-    if(!currentVideoId) return;
-    document.getElementById('fullPlayer').classList.toggle('open');
-}
-
+// KONTROL UPDATE TAMPILAN
 function loadSongToPlayer(videoId, title, channel) {
     currentVideoId = videoId;
     
-    // Update Mini Player
+    // Mini Player Update
     document.getElementById('miniPlayer').classList.add('show');
     document.getElementById('miniTitle').innerText = title;
     document.getElementById('miniArtist').innerText = channel;
-    const miniImg = document.getElementById('miniThumb');
-    miniImg.src = 'https://img.youtube.com/vi/' + videoId + '/default.jpg';
-    miniImg.style.display = 'block';
+    document.getElementById('miniThumb').src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+    document.getElementById('miniThumb').style.display = 'block';
 
-    // Update Full Player
+    // Full Player Update
     document.getElementById('fullTitle').innerText = title;
     document.getElementById('fullArtist').innerText = channel;
-    document.getElementById('defaultIcon').style.display = 'none';
-    const fullImg = document.getElementById('fullThumb');
-    fullImg.src = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
-    fullImg.style.display = 'block';
+    document.getElementById('fullThumb').src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    document.getElementById('fullThumb').style.display = 'block';
     
     document.getElementById('prevBtn').disabled = historyIndex <= 0;
     
+    checkIfLiked(); // Update icon hati
+
     if (player && player.loadVideoById) player.loadVideoById(videoId);
     fetchLyrics(title, channel);
 }
@@ -274,10 +286,53 @@ function selectSong(videoId, title, channel) {
     loadSongToPlayer(videoId, title, channel);
 }
 
-// SIMPAN KE MONGODB
+// LOGIKA TOMBOL LOVE & PLAYLIST
+function checkIfLiked() {
+    if (!currentVideoId) return;
+    const likedSongs = allPlaylists["Lagu Disukai"] || [];
+    const isLiked = likedSongs.find(s => s.videoId === currentVideoId);
+    
+    const likeBtn = document.getElementById('likeBtn');
+    if (isLiked) {
+        likeBtn.innerText = '♥'; // Hati isi
+        likeBtn.style.color = '#1db954';
+    } else {
+        likeBtn.innerText = '♡'; // Hati kosong
+        likeBtn.style.color = '#fff';
+    }
+}
+
+async function toggleLike() {
+    if (!currentVideoId) return;
+    const likedSongs = allPlaylists["Lagu Disukai"] || [];
+    const isLiked = likedSongs.find(s => s.videoId === currentVideoId);
+    
+    const method = isLiked ? 'DELETE' : 'POST';
+    const bodyData = {
+        playlistName: "Lagu Disukai",
+        videoId: currentVideoId,
+        title: document.getElementById('fullTitle').innerText,
+        channel: document.getElementById('fullArtist').innerText
+    };
+
+    try {
+        // Tembak API buat tambah/hapus
+        await fetch('/api/playlist', {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        });
+        
+        // Refresh daftar playlist biar sinkron
+        await loadPlaylistsToHome(); 
+    } catch (e) {
+        alert("Gagal sinkron sama database");
+    }
+}
+
 async function addToPlaylist() {
     if (!currentVideoId) return;
-    const playlistName = prompt("Simpan ke playlist apa?", "Favorit");
+    const playlistName = prompt("Simpan ke playlist mana?", "Favorit");
     if (!playlistName) return;
 
     try {
@@ -293,8 +348,7 @@ async function addToPlaylist() {
         });
         const data = await response.json();
         if (data.success) {
-            alert("Lagu disimpan!");
-            loadPlaylistsToHome(); // Refresh tampilan kotak playlist di beranda
-        } else { alert("Gagal: " + data.error); }
+            loadPlaylistsToHome(); // Refresh otomatis
+        } else { alert(data.error); }
     } catch (error) { alert("Error database."); }
 }
