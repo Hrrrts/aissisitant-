@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Ideas</title>
+    <style>
+        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; }
+        .top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
+        .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+        .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+        
+        .section-title { font-size: 13px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; margin-top: 30px; font-weight: 600; }
+        
+        .input-box { width: 100%; background: #111111; border: 1px solid #222222; color: #ffffff; padding: 16px; border-radius: 12px; font-size: 14px; outline: none; transition: 0.2s; box-sizing: border-box; font-family: inherit; resize: none; margin-bottom: 12px; }
+        .input-box:focus { border-color: #444444; }
+        
+        .btn-action { background: #ffffff; color: #000000; border: none; padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-action:active { transform: scale(0.98); background: #dddddd; }
+        .btn-danger { background: #1a1a1a; color: #ff4444; border: 1px solid #331111; margin-top: 8px;}
+        
+        /* Area Bubble */
+        .bubble-container { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .bubble-card { background: #111111; border: 1px solid #222222; padding: 16px; border-radius: 16px 16px 16px 4px; font-size: 14px; line-height: 1.5; color: #cccccc; word-wrap: break-word; position: relative;}
+        .bubble-date { font-size: 11px; color: #666666; margin-top: 8px; text-align: right; }
+        .delete-btn { position: absolute; top: 12px; right: 16px; color: #555555; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <h2 class="title-header">Bubble Ideas</h2>
+    </div>
+
+    <!-- Kontrol Quotes -->
+    <div class="section-title">Atur Quotes Hari Ini</div>
+    <input type="text" id="quoteInput" class="input-box" placeholder="Ketik kata-kata mutiara lu...">
+    <button class="btn-action" onclick="saveQuote()">Pasang Quotes</button>
+    <button class="btn-action btn-danger" onclick="clearQuote()">Hapus Quotes</button>
+
+    <!-- Kontrol Ide -->
+    <div class="section-title">Buat Bubble Baru</div>
+    <textarea id="ideaInput" class="input-box" rows="4" placeholder="Lagi mikirin apa? Tumpahin di sini..."></textarea>
+    <button class="btn-action" onclick="saveIdea()">Simpan Ide</button>
+
+    <!-- Daftar Ide -->
+    <div class="section-title" style="margin-top: 40px;">Arsip Ide</div>
+    <div class="bubble-container" id="bubblesList">
+        <!-- Bubble akan muncul di sini -->
+    </div>
+
+    <script>
+        // --- LOGIKA QUOTES ---
+        // Tampilkan quote tersimpan di kotak input
+        document.getElementById('quoteInput').value = localStorage.getItem('my_quote') || '';
+
+        function saveQuote() {
+            const val = document.getElementById('quoteInput').value;
+            localStorage.setItem('my_quote', val);
+            alert('Quotes berhasil dipasang! Cek halaman depan.');
+        }
+
+        function clearQuote() {
+            localStorage.removeItem('my_quote');
+            document.getElementById('quoteInput').value = '';
+            alert('Quotes dihapus. Widget di depan akan hilang.');
+        }
+
+        // --- LOGIKA BUBBLE IDEAS ---
+        let ideas = JSON.parse(localStorage.getItem('my_ideas')) || [];
+
+        function renderIdeas() {
+            const list = document.getElementById('bubblesList');
+            if (ideas.length === 0) {
+                list.innerHTML = '<p style="color:#555; font-size:13px; text-align:center;">Belum ada ide yang disimpan.</p>';
+                return;
+            }
+            
+            list.innerHTML = ideas.map((idea, index) => `
+                <div class="bubble-card">
+                    <button class="delete-btn" onclick="deleteIdea(${index})">×</button>
+                    ${idea.text.replace(/\n/g, '<br>')}
+                    <div class="bubble-date">${idea.date}</div>
+                </div>
+            `).join('');
+        }
+
+        function saveIdea() {
+            const val = document.getElementById('ideaInput').value;
+            if (!val.trim()) return;
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID') + ' • ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+            // Tambahkan ide baru ke urutan paling atas
+            ideas.unshift({ text: val, date: dateStr });
+            localStorage.setItem('my_ideas', JSON.stringify(ideas));
+            
+            document.getElementById('ideaInput').value = '';
+            renderIdeas();
+        }
+
+        function deleteIdea(index) {
+            ideas.splice(index, 1);
+            localStorage.setItem('my_ideas', JSON.stringify(ideas));
+            renderIdeas();
+        }
+
+        // Jalankan saat pertama dibuka
+        renderIdeas();
+    </script>
+</body>
+</html>

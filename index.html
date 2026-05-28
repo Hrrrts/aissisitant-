@@ -11,7 +11,7 @@
         .header p { color: #888888; font-size: 14px; margin-top: 6px; }
         
         /* Widget Quotes Harian */
-        .quote-widget { background: linear-gradient(135deg, #111111, #1a1a1a); border-left: 3px solid #ffffff; padding: 18px 20px; border-radius: 0 12px 12px 0; margin-bottom: 35px; }
+        .quote-widget { background: linear-gradient(135deg, #111111, #1a1a1a); border-left: 3px solid #ffffff; padding: 18px 20px; border-radius: 0 12px 12px 0; margin-bottom: 35px; display: none; }
         .quote-text { margin: 0; font-size: 13px; color: #dddddd; line-height: 1.6; font-style: italic; }
         .quote-author { margin: 8px 0 0 0; font-size: 11px; color: #777777; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -29,9 +29,10 @@
         <p>Sistem Personal Backend</p>
     </div>
 
-    <div class="quote-widget">
-        <p class="quote-text" id="quoteText">"Memuat kutipan..."</p>
-        <p class="quote-author" id="quoteAuthor"></p>
+    <!-- Widget Quotes (Hanya muncul kalau ada isinya) -->
+    <div class="quote-widget" id="quoteWidget">
+        <p class="quote-text" id="quoteText"></p>
+        <p class="quote-author">- Harits</p>
     </div>
     
     <a href="music.html" class="card">
@@ -65,18 +66,12 @@
     </a>
 
     <script>
-        // Logika pengacak Quotes
-        const quotes = [
-            { text: "Jangan bandingkan prosesmu dengan orang lain. Bunga tidak mekar secara bersamaan.", author: "Zen Proverb" },
-            { text: "Bukan tentang seberapa cepat kamu sampai, tapi seberapa kuat kamu bertahan.", author: "Anonim" },
-            { text: "Satu error terselesaikan, sepuluh error baru menanti. Nikmati prosesnya.", author: "Developer" },
-            { text: "Terkadang hal yang paling berani untuk dilakukan adalah melanjutkan hidup.", author: "T.S. Eliot" },
-            { text: "Fokus pada langkah yang ada di depan mata, bukan seluruh anak tangga.", author: "Anonim" }
-        ];
-        
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        document.getElementById('quoteText').innerText = '"' + randomQuote.text + '"';
-        document.getElementById('quoteAuthor').innerText = '- ' + randomQuote.author;
+        // Cek memori lokal, kalau ada quotes, tampilkan. Kalau kosong, sembunyikan.
+        const savedQuote = localStorage.getItem('my_quote');
+        if (savedQuote && savedQuote.trim() !== '') {
+            document.getElementById('quoteWidget').style.display = 'block';
+            document.getElementById('quoteText').innerText = '"' + savedQuote + '"';
+        }
     </script>
 </body>
 </html>
