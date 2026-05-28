@@ -7,30 +7,57 @@
     <link rel="stylesheet" href="css/music.css">
 </head>
 <body>
-    <div class="top-bar">
-        <a href="index.html" class="back-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </a>
-        <h2 class="title-header">AISMUSIC</h2>
-    </div>
+    <div class="main-content">
+        <div class="top-bar">
+            <a href="index.html" class="back-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <h2 class="title-header">AISMUSIC</h2>
+            <div style="width:24px;"></div> </div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Cari lagu...">
-        <button id="searchBtn" class="search-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </button>
-    </div>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari lagu...">
+            <button id="searchBtn" class="search-btn">🔍</button>
+        </div>
 
-    <div id="searchResults" class="search-results"></div>
+        <div id="searchResults" class="search-results"></div>
 
-    <div class="player-section">
-        <div class="album-art" id="albumArtContainer">
-            <svg id="defaultIcon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
-            <img id="albumImage" class="album-img" src="" alt="Thumbnail">
+        <div id="homeScreen" class="home-screen">
+            <h3 class="section-title">Koleksi Playlist Lu</h3>
+            <div id="playlistGrid" class="playlist-grid">
+                <p style="color:#888; font-size:13px; grid-column: span 2;">Memuat data dari server...</p>
+            </div>
         </div>
         
-        <p class="song-title" id="title">Belum ada lagu</p>
-        <p class="song-artist" id="artist">-</p>
+        <div style="height: 100px;"></div>
+    </div>
+
+    <div id="miniPlayer" class="mini-player" onclick="toggleFullPlayer()">
+        <img id="miniThumb" src="" alt="Thumb" style="display:none;">
+        <div class="mini-info">
+            <div id="miniTitle" class="mini-title">Belum ada lagu</div>
+            <div id="miniArtist" class="mini-artist">-</div>
+        </div>
+        <div class="mini-controls" onclick="event.stopPropagation()">
+            <button id="miniPlayBtn" class="nav-btn">▶</button>
+            <button id="miniNextBtn" class="nav-btn">⏭</button>
+        </div>
+    </div>
+
+    <div id="fullPlayer" class="full-player">
+        <div class="fp-header">
+            <button class="nav-btn" onclick="toggleFullPlayer()">↓</button>
+            <span style="font-size:12px; font-weight:bold; letter-spacing:1px; color:#888;">SEDANG DIPUTAR</span>
+            <button class="nav-btn" onclick="addToPlaylist()" title="Simpan ke Playlist">➕</button>
+        </div>
+
+        <div class="album-art">
+            <svg id="defaultIcon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            <img id="fullThumb" class="album-img" src="" alt="Thumbnail">
+        </div>
+        
+        <p class="song-title" id="fullTitle">Belum ada lagu</p>
+        <p class="song-artist" id="fullArtist">-</p>
         
         <div class="progress-container">
             <span class="time-text" id="currentTime">0:00</span>
@@ -39,27 +66,18 @@
         </div>
 
         <div class="controls">
-            <button id="prevBtn" class="nav-btn" disabled>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"></line></svg>
-            </button>
-            
-            <button id="playBtn" class="play-btn">
-                <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </button>
-            
-            <button id="nextBtn" class="nav-btn">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line></svg>
-            </button>
+            <button id="prevBtn" class="nav-btn" disabled>⏮</button>
+            <button id="playBtn" class="play-btn">▶</button>
+            <button id="nextBtn" class="nav-btn">⏭</button>
         </div>
-        
-        <div id="playerContainer" style="display: none;"></div>
-    </div>
 
-    <div class="lyrics-section">
-        <div id="lyricsTitle" class="lyrics-title">LIRIK LAGU</div>
-        <div id="lyricsContainer" class="lyrics-box"></div>
+        <div class="lyrics-section">
+            <div id="lyricsTitle" class="lyrics-title">LIRIK LAGU</div>
+            <div id="lyricsContainer" class="lyrics-box"></div>
+        </div>
     </div>
-
+    
+    <div id="playerContainer" style="display: none;"></div>
     <script src="js/music.js"></script>
 </body>
 </html>
