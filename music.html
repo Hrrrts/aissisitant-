@@ -25,6 +25,11 @@
         .song-artist { font-size: 14px; color: #888888; margin: 0 0 30px 0; text-align: center; }
         .controls { display: flex; align-items: center; gap: 24px; }
         .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        
+        /* Box Lirik Baru */
+        .lyrics-section { margin-top: 40px; width: 100%; box-sizing: border-box; }
+        .lyrics-title { font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; text-align: center; display: none; }
+        .lyrics-box { background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 24px; font-size: 14px; line-height: 2.2; color: #dddddd; text-align: center; max-height: 350px; overflow-y: auto; display: none; }
     </style>
 </head>
 <body>
@@ -61,12 +66,16 @@
         <div id="playerContainer" style="display: none;"></div>
     </div>
 
+    <div class="lyrics-section">
+        <div id="lyricsTitle" class="lyrics-title">LIRIK LAGU</div>
+        <div id="lyricsContainer" class="lyrics-box"></div>
+    </div>
+
     <script>
         let player;
         let currentVideoId = '';
         let isPlaying = false;
 
-        // 1. Memanggil Mesin YouTube
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -77,26 +86,22 @@
                 height: '0',
                 width: '0',
                 videoId: '',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'playsinline': 1 },
+                playerVars: { 'autoplay': 1, 'controls': 0, 'playsinline': 1 },
                 events: { 'onStateChange': onPlayerStateChange }
             });
         }
 
-        // 2. Mengubah tombol play/pause otomatis
         function onPlayerStateChange(event) {
             const playIcon = document.getElementById('playIcon');
             if (event.data == YT.PlayerState.PLAYING) {
                 isPlaying = true;
-                // Ganti jadi icon Pause
                 playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
             } else {
                 isPlaying = false;
-                // Ganti jadi icon Play
                 playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
             }
         }
 
-        // 3. Logika Pencarian
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
@@ -127,22 +132,52 @@
             }
         });
 
-        // 4. Logika Pilih Lagu (Otomatis Play)
+        // FUNGSI CARI LIRIK (Pembersihan Judul Otomatis)
+        async function fetchLyrics(rawTitle, artist) {
+            const lyricsBox = document.getElementById('lyricsContainer');
+            const lyricsTitle = document.getElementById('lyricsTitle');
+            
+            lyricsTitle.style.display = 'block';
+            lyricsBox.style.display = 'block';
+            lyricsBox.innerHTML = '<i style="color:#777;">Mencari lirik...</i>';
+
+            // Bersihkan judul dari kata-kata seperti (Official Video), [Lyric], dll
+            const cleanTitle = rawTitle.replace(/\[.*?\]|\(.*?\)/g, '').trim();
+            const searchQuery = encodeURIComponent(cleanTitle + ' ' + artist);
+
+            try {
+                // Memanggil API Publik LRCLIB
+                const res = await fetch('https://lrclib.net/api/search?q=' + searchQuery);
+                const data = await res.json();
+
+                if (data && data.length > 0 && data[0].plainLyrics) {
+                    // Ganti enter dengan tag <br> supaya rapi
+                    const formattedLyrics = data[0].plainLyrics.replace(/\n/g, '<br>');
+                    lyricsBox.innerHTML = formattedLyrics;
+                } else {
+                    lyricsBox.innerHTML = '<i style="color:#777;">Maaf, lirik tidak ditemukan di database.</i>';
+                }
+            } catch (e) {
+                lyricsBox.innerHTML = '<i style="color:#777;">Gagal memuat lirik (koneksi terputus).</i>';
+            }
+        }
+
         function selectSong(videoId, title, channel) {
             currentVideoId = videoId;
             document.getElementById('title').innerText = title;
             document.getElementById('artist').innerText = channel;
             document.getElementById('searchResults').style.display = 'none';
             
-            // Perintahkan YouTube API memutar lagu ini
             if (player && player.loadVideoById) {
                 player.loadVideoById(videoId);
             }
+
+            // Panggil lirik langsung setelah lagu dipilih
+            fetchLyrics(title, channel);
         }
 
-        // 5. Fungsi Tombol Play/Pause Manual
         document.getElementById('playBtn').addEventListener('click', () => {
-            if (!currentVideoId || !player) return; // Abaikan kalau belum milih lagu
+            if (!currentVideoId || !player) return;
             if (isPlaying) {
                 player.pauseVideo();
             } else {
