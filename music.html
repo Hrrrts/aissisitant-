@@ -6,42 +6,25 @@
     <title>Aisplayer</title>
     <style>
         body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; }
-        
-        /* Navigasi Atas */
         .top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
         .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
         .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px;}
-        
-        /* Area Pencarian */
         .search-container { position: relative; display: flex; gap: 10px; }
         .search-input { flex: 1; background: #111111; border: 1px solid #222222; color: #ffffff; padding: 16px 20px; border-radius: 12px; font-size: 15px; outline: none; transition: 0.2s; }
         .search-input:focus { border-color: #444444; }
-        .search-input::placeholder { color: #555555; }
         .search-btn { background: #ffffff; color: #000000; border: none; border-radius: 12px; width: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .search-btn:active { background: #cccccc; transform: scale(0.96); }
-        
-        /* Daftar Lagu Memanjang (Awalnya disembunyikan) */
         .search-results { display: none; background: #111111; border: 1px solid #222222; border-radius: 12px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
         .result-item { padding: 16px 20px; border-bottom: 1px solid #222222; font-size: 14px; cursor: pointer; color: #dddddd; line-height: 1.4; }
         .result-item:last-child { border-bottom: none; }
-        .result-item:active { background: #1a1a1a; }
         .result-title { font-weight: 600; color: #ffffff; margin-bottom: 4px; }
         .result-channel { font-size: 12px; color: #888888; }
-
-        /* Area Player */
         .player-section { margin-top: 40px; display: flex; flex-direction: column; align-items: center; }
-        .album-art { width: 100%; max-width: 300px; aspect-ratio: 1/1; background: linear-gradient(135deg, #151515, #050505); border: 1px solid #222222; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #222222; margin-bottom: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .album-art { width: 100%; max-width: 300px; aspect-ratio: 1/1; background: linear-gradient(135deg, #151515, #050505); border: 1px solid #222222; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #222222; margin-bottom: 30px; }
         .song-title { font-size: 20px; font-weight: 700; margin: 0 0 6px 0; text-align: center; color: #ffffff; }
         .song-artist { font-size: 14px; color: #888888; margin: 0 0 30px 0; text-align: center; }
-        
-        /* Kontrol */
         .controls { display: flex; align-items: center; gap: 24px; }
-        .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .play-btn:active { transform: scale(0.94); }
-        .play-btn svg { margin-left: 4px; } /* Menyesuaikan posisi ikon play agar pas di tengah */
-        
-        /* Area Lirik */
-        .lyrics-box { margin-top: 40px; padding: 24px; background: #111111; border: 1px solid #222222; border-radius: 16px; font-size: 14px; line-height: 2.2; color: #aaaaaa; text-align: center; display: none; max-height: 350px; overflow-y: auto; letter-spacing: 0.3px; }
+        .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .lyrics-box { margin-top: 40px; padding: 24px; background: #111111; border: 1px solid #222222; border-radius: 16px; font-size: 14px; line-height: 2.2; color: #aaaaaa; text-align: center; display: none; max-height: 350px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -52,7 +35,6 @@
         <h2 class="title-header">AISPLAYER</h2>
     </div>
 
-    <!-- Kotak Pencarian -->
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="Cari lagu...">
         <button id="searchBtn" class="search-btn">
@@ -60,12 +42,8 @@
         </button>
     </div>
 
-    <!-- Wadah Daftar Pencarian -->
-    <div id="searchResults" class="search-results">
-        <!-- Hasil pencarian akan dirender di sini -->
-    </div>
+    <div id="searchResults" class="search-results"></div>
 
-    <!-- Player Utama -->
     <div class="player-section">
         <div class="album-art">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
@@ -78,13 +56,50 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             </button>
         </div>
-        <!-- Wadah Audio YouTube (tersembunyi) -->
-        <div id="playerContainer" style="display: none;"></div>
     </div>
 
-    <!-- Wadah Lirik Lagu -->
-    <div id="lyricsContainer" class="lyrics-box">
-        <!-- Lirik akan dimuat di sini -->
-    </div>
+    <div id="lyricsContainer" class="lyrics-box"></div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResults = document.getElementById('searchResults');
+        
+        searchBtn.addEventListener('click', async () => {
+            const query = searchInput.value;
+            if (!query) return;
+            
+            // Tampilkan animasi loading
+            searchResults.style.display = 'block';
+            searchResults.innerHTML = '<div class="result-item" style="text-align:center;">Mencari di database...</div>';
+            
+            try {
+                // Menghubungi sistem Vercel kamu
+                const response = await fetch('/api/search?q=' + encodeURIComponent(query));
+                const data = await response.json();
+                
+                // Menampilkan hasil tangkapan dari backend
+                if(data && data.title) {
+                    searchResults.innerHTML = `
+                        <div class="result-item" onclick="selectSong('${data.title.replace(/'/g, "\\'")}')">
+                            <div class="result-title">${data.title}</div>
+                            <div class="result-channel">Ketuk untuk memutar lagu ini</div>
+                        </div>
+                    `;
+                } else {
+                    searchResults.innerHTML = '<div class="result-item">Lagu tidak ditemukan.</div>';
+                }
+            } catch (error) {
+                searchResults.innerHTML = '<div class="result-item">Koneksi ke server terputus.</div>';
+            }
+        });
+
+        // Fungsi sementara saat lagu dipilih dari daftar
+        function selectSong(title) {
+            document.getElementById('title').innerText = title;
+            document.getElementById('artist').innerText = "Lagu siap diputar";
+            document.getElementById('searchResults').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
