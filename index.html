@@ -46,6 +46,19 @@
         <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </a>
 
+    <a href="task.html" class="card">
+        <div class="card-left">
+            <div class="icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            </div>
+            <div>
+                <p class="card-title">Ais Task</p>
+                <p class="card-subtitle">Kanban & To-Do Board</p>
+            </div>
+        </div>
+        <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+    </a>
+
     <a href="wallet.html" class="card">
         <div class="card-left">
             <div class="icon-box">
@@ -74,13 +87,6 @@
 
     <script>
         let quotes = JSON.parse(localStorage.getItem('ais_quotes_list')) || [];
-        const oldQuote = localStorage.getItem('my_quote');
-        if (oldQuote) { 
-            quotes.push(oldQuote); 
-            localStorage.setItem('ais_quotes_list', JSON.stringify(quotes));
-            localStorage.removeItem('my_quote'); 
-        }
-
         if (quotes.length > 0) {
             const widget = document.getElementById('quoteWidget');
             widget.style.display = 'block';
