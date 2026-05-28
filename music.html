@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aisplayer</title>
+    <title>Aismusic</title>
     <style>
         body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; }
         .top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
@@ -16,6 +16,7 @@
         .search-results { display: none; background: #111111; border: 1px solid #222222; border-radius: 12px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
         .result-item { padding: 16px 20px; border-bottom: 1px solid #222222; font-size: 14px; cursor: pointer; color: #dddddd; line-height: 1.4; }
         .result-item:last-child { border-bottom: none; }
+        .result-item:active { background: #1a1a1a; }
         .result-title { font-weight: 600; color: #ffffff; margin-bottom: 4px; }
         .result-channel { font-size: 12px; color: #888888; }
         .player-section { margin-top: 40px; display: flex; flex-direction: column; align-items: center; }
@@ -24,7 +25,6 @@
         .song-artist { font-size: 14px; color: #888888; margin: 0 0 30px 0; text-align: center; }
         .controls { display: flex; align-items: center; gap: 24px; }
         .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .lyrics-box { margin-top: 40px; padding: 24px; background: #111111; border: 1px solid #222222; border-radius: 16px; font-size: 14px; line-height: 2.2; color: #aaaaaa; text-align: center; display: none; max-height: 350px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -32,7 +32,7 @@
         <a href="index.html" class="back-btn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         </a>
-        <h2 class="title-header">AISPLAYER</h2>
+        <h2 class="title-header">AISMUSIC</h2>
     </div>
 
     <div class="search-container">
@@ -48,8 +48,9 @@
         <div class="album-art">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
         </div>
-        <p class="song-title" id="title">Ais Standby</p>
-        <p class="song-artist" id="artist">Sistem Audio Pintar</p>
+        
+        <p class="song-title" id="title">Belum ada lagu</p>
+        <p class="song-artist" id="artist">-</p>
         
         <div class="controls">
             <button id="playBtn" class="play-btn">
@@ -57,8 +58,6 @@
             </button>
         </div>
     </div>
-
-    <div id="lyricsContainer" class="lyrics-box"></div>
 
     <script>
         const searchInput = document.getElementById('searchInput');
@@ -69,23 +68,22 @@
             const query = searchInput.value;
             if (!query) return;
             
-            // Tampilkan animasi loading
             searchResults.style.display = 'block';
-            searchResults.innerHTML = '<div class="result-item" style="text-align:center;">Mencari di database...</div>';
+            searchResults.innerHTML = '<div class="result-item" style="text-align:center;">Mencari...</div>';
             
             try {
-                // Menghubungi sistem Vercel kamu
                 const response = await fetch('/api/search?q=' + encodeURIComponent(query));
                 const data = await response.json();
                 
-                // Menampilkan hasil tangkapan dari backend
-                if(data && data.title) {
-                    searchResults.innerHTML = `
-                        <div class="result-item" onclick="selectSong('${data.title.replace(/'/g, "\\'")}')">
-                            <div class="result-title">${data.title}</div>
-                            <div class="result-channel">Ketuk untuk memutar lagu ini</div>
+                // Cek apakah data berupa array (banyak hasil)
+                if(Array.isArray(data) && data.length > 0) {
+                    // Petakan semua hasil jadi daftar ke bawah
+                    searchResults.innerHTML = data.map(item => `
+                        <div class="result-item" onclick="selectSong('${item.videoId}', '${item.title.replace(/'/g, "\\'")}', '${item.channel.replace(/'/g, "\\'")}')">
+                            <div class="result-title">${item.title}</div>
+                            <div class="result-channel">${item.channel}</div>
                         </div>
-                    `;
+                    `).join('');
                 } else {
                     searchResults.innerHTML = '<div class="result-item">Lagu tidak ditemukan.</div>';
                 }
@@ -94,10 +92,9 @@
             }
         });
 
-        // Fungsi sementara saat lagu dipilih dari daftar
-        function selectSong(title) {
+        function selectSong(videoId, title, channel) {
             document.getElementById('title').innerText = title;
-            document.getElementById('artist').innerText = "Lagu siap diputar";
+            document.getElementById('artist').innerText = channel;
             document.getElementById('searchResults').style.display = 'none';
         }
     </script>
