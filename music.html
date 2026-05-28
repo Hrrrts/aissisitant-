@@ -19,17 +19,26 @@
         .result-item:active { background: #1a1a1a; }
         .result-title { font-weight: 600; color: #ffffff; margin-bottom: 4px; }
         .result-channel { font-size: 12px; color: #888888; }
-        .player-section { margin-top: 40px; display: flex; flex-direction: column; align-items: center; }
-        .album-art { width: 100%; max-width: 300px; aspect-ratio: 1/1; background: linear-gradient(135deg, #151515, #050505); border: 1px solid #222222; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #222222; margin-bottom: 30px; }
+        
+        .player-section { margin-top: 30px; display: flex; flex-direction: column; align-items: center; }
+        .album-art { width: 100%; max-width: 300px; aspect-ratio: 1/1; background: linear-gradient(135deg, #151515, #050505); border: 1px solid #222222; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #222222; margin-bottom: 20px; overflow: hidden;}
+        .album-img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .song-title { font-size: 20px; font-weight: 700; margin: 0 0 6px 0; text-align: center; color: #ffffff; }
-        .song-artist { font-size: 14px; color: #888888; margin: 0 0 30px 0; text-align: center; }
+        .song-artist { font-size: 14px; color: #888888; margin: 0 0 20px 0; text-align: center; }
+        
+        /* Bar Durasi Waktu */
+        .progress-container { width: 100%; max-width: 320px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .time-text { font-size: 12px; color: #888888; width: 35px; text-align: center; font-variant-numeric: tabular-nums; }
+        .progress-bar { flex: 1; height: 4px; -webkit-appearance: none; background: #333333; border-radius: 2px; outline: none; }
+        .progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; cursor: pointer; }
+
         .controls { display: flex; align-items: center; gap: 24px; }
         .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         
         /* Box Lirik Baru */
         .lyrics-section { margin-top: 40px; width: 100%; box-sizing: border-box; }
         .lyrics-title { font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; text-align: center; display: none; }
-        .lyrics-box { background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 24px; font-size: 14px; line-height: 2.2; color: #dddddd; text-align: center; max-height: 350px; overflow-y: auto; display: none; }
+        .lyrics-box { background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 24px; font-size: 14px; line-height: 2.2; color: #dddddd; text-align: center; max-height: 400px; overflow-y: auto; display: none; }
     </style>
 </head>
 <body>
@@ -50,13 +59,20 @@
     <div id="searchResults" class="search-results"></div>
 
     <div class="player-section">
-        <div class="album-art">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+        <div class="album-art" id="albumArtContainer">
+            <svg id="defaultIcon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            <img id="albumImage" class="album-img" src="" alt="Thumbnail">
         </div>
         
         <p class="song-title" id="title">Belum ada lagu</p>
         <p class="song-artist" id="artist">-</p>
         
+        <div class="progress-container">
+            <span class="time-text" id="currentTime">0:00</span>
+            <input type="range" id="progressBar" class="progress-bar" value="0" step="1" min="0">
+            <span class="time-text" id="durationTime">0:00</span>
+        </div>
+
         <div class="controls">
             <button id="playBtn" class="play-btn">
                 <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -75,6 +91,7 @@
         let player;
         let currentVideoId = '';
         let isPlaying = false;
+        let progressInterval;
 
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -91,16 +108,46 @@
             });
         }
 
+        function formatTime(seconds) {
+            if (!seconds) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
         function onPlayerStateChange(event) {
             const playIcon = document.getElementById('playIcon');
+            const progressBar = document.getElementById('progressBar');
+            
             if (event.data == YT.PlayerState.PLAYING) {
                 isPlaying = true;
                 playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+                
+                // Set maksimal slider sesuai durasi lagu
+                progressBar.max = player.getDuration();
+                document.getElementById('durationTime').innerText = formatTime(player.getDuration());
+                
+                // Update slider setiap detik
+                progressInterval = setInterval(() => {
+                    const current = player.getCurrentTime();
+                    progressBar.value = current;
+                    document.getElementById('currentTime').innerText = formatTime(current);
+                }, 1000);
+
             } else {
                 isPlaying = false;
                 playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+                clearInterval(progressInterval);
             }
         }
+
+        // Fitur Geser Durasi (Seeker)
+        document.getElementById('progressBar').addEventListener('input', (e) => {
+            if(player && player.seekTo) {
+                player.seekTo(e.target.value, true);
+                document.getElementById('currentTime').innerText = formatTime(e.target.value);
+            }
+        });
 
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
@@ -132,7 +179,6 @@
             }
         });
 
-        // FUNGSI CARI LIRIK (Pembersihan Judul Otomatis)
         async function fetchLyrics(rawTitle, artist) {
             const lyricsBox = document.getElementById('lyricsContainer');
             const lyricsTitle = document.getElementById('lyricsTitle');
@@ -141,21 +187,27 @@
             lyricsBox.style.display = 'block';
             lyricsBox.innerHTML = '<i style="color:#777;">Mencari lirik...</i>';
 
-            // Bersihkan judul dari kata-kata seperti (Official Video), [Lyric], dll
-            const cleanTitle = rawTitle.replace(/\[.*?\]|\(.*?\)/g, '').trim();
-            const searchQuery = encodeURIComponent(cleanTitle + ' ' + artist);
+            // 1. Bersihkan tanda kurung
+            let cleanTitle = rawTitle.replace(/\[.*?\]|\(.*?\)/g, '').trim();
+            
+            // 2. Jika judul YouTube digabung "Artis - Judul", kita pisahkan
+            let searchQuery = cleanTitle;
+            if (cleanTitle.includes('-')) {
+                let parts = cleanTitle.split('-');
+                searchQuery = parts[1].trim() + ' ' + parts[0].trim(); // Dibalik jadi "Judul Artis"
+            } else {
+                searchQuery = cleanTitle + ' ' + artist;
+            }
 
             try {
-                // Memanggil API Publik LRCLIB
-                const res = await fetch('https://lrclib.net/api/search?q=' + searchQuery);
+                const res = await fetch('https://lrclib.net/api/search?q=' + encodeURIComponent(searchQuery));
                 const data = await res.json();
 
                 if (data && data.length > 0 && data[0].plainLyrics) {
-                    // Ganti enter dengan tag <br> supaya rapi
                     const formattedLyrics = data[0].plainLyrics.replace(/\n/g, '<br>');
                     lyricsBox.innerHTML = formattedLyrics;
                 } else {
-                    lyricsBox.innerHTML = '<i style="color:#777;">Maaf, lirik tidak ditemukan di database.</i>';
+                    lyricsBox.innerHTML = '<i style="color:#777;">Maaf, lirik tidak ditemukan untuk lagu ini.</i>';
                 }
             } catch (e) {
                 lyricsBox.innerHTML = '<i style="color:#777;">Gagal memuat lirik (koneksi terputus).</i>';
@@ -168,11 +220,16 @@
             document.getElementById('artist').innerText = channel;
             document.getElementById('searchResults').style.display = 'none';
             
+            // Tampilkan Thumbnail Album
+            document.getElementById('defaultIcon').style.display = 'none';
+            const albumImg = document.getElementById('albumImage');
+            albumImg.src = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
+            albumImg.style.display = 'block';
+            
             if (player && player.loadVideoById) {
                 player.loadVideoById(videoId);
             }
 
-            // Panggil lirik langsung setelah lagu dipilih
             fetchLyrics(title, channel);
         }
 
