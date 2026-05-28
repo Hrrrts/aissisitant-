@@ -5,32 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aissistant</title>
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 25px; }
-        .header { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; margin-top: 20px;}
-        .header h1 { margin: 0; font-size: 26px; color: #38bdf8; letter-spacing: 1px;}
-        .module-title { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; font-weight: bold;}
-        .card { background-color: #1e293b; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: white; transition: 0.2s; border: 1px solid #334155;}
-        .card:active { transform: scale(0.98); background-color: #334155; }
-        .card-left { display: flex; align-items: center; gap: 18px; }
-        .icon { background-color: #3b82f6; padding: 12px; border-radius: 12px; font-size: 20px;}
-        .title { font-size: 19px; font-weight: bold; margin: 0; }
-        .subtitle { font-size: 13px; color: #94a3b8; margin: 5px 0 0 0; }
+        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; margin: 0; padding: 40px 20px; }
+        .header { margin-bottom: 40px; }
+        .header h1 { font-size: 28px; font-weight: 700; margin: 0; color: #ffffff; letter-spacing: -0.5px; }
+        .header p { color: #888888; font-size: 14px; margin-top: 6px; }
+        .card { display: flex; align-items: center; justify-content: space-between; background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 20px; text-decoration: none; color: inherit; transition: 0.2s ease; }
+        .card:active { background: #1a1a1a; transform: scale(0.98); }
+        .card-left { display: flex; align-items: center; gap: 16px; }
+        .icon-box { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; color: #ffffff; }
+        .card-title { font-size: 16px; font-weight: 600; margin: 0; color: #ffffff;}
+        .card-subtitle { font-size: 13px; color: #888888; margin: 4px 0 0 0; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🤖 Aissistant</h1>
+        <h1>Aissistant</h1>
+        <p>Sistem Personal Backend</p>
     </div>
-    <div class="module-title">Modul Sistem</div>
+    
     <a href="music.html" class="card">
         <div class="card-left">
-            <div class="icon">🎵</div>
+            <div class="icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            </div>
             <div>
-                <p class="title">Aisplayer</p>
-                <p class="subtitle">Smart Audio AI</p>
+                <p class="card-title">Aisplayer</p>
+                <p class="card-subtitle">Smart Audio Search</p>
             </div>
         </div>
-        <div>❯</div>
+        <div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
     </a>
 </body>
 </html>
