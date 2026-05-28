@@ -54,12 +54,49 @@
         
         <div class="controls">
             <button id="playBtn" class="play-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             </button>
         </div>
+        
+        <div id="playerContainer" style="display: none;"></div>
     </div>
 
     <script>
+        let player;
+        let currentVideoId = '';
+        let isPlaying = false;
+
+        // 1. Memanggil Mesin YouTube
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('playerContainer', {
+                height: '0',
+                width: '0',
+                videoId: '',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'playsinline': 1 },
+                events: { 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        // 2. Mengubah tombol play/pause otomatis
+        function onPlayerStateChange(event) {
+            const playIcon = document.getElementById('playIcon');
+            if (event.data == YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                // Ganti jadi icon Pause
+                playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+            } else {
+                isPlaying = false;
+                // Ganti jadi icon Play
+                playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+            }
+        }
+
+        // 3. Logika Pencarian
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
@@ -75,9 +112,7 @@
                 const response = await fetch('/api/search?q=' + encodeURIComponent(query));
                 const data = await response.json();
                 
-                // Cek apakah data berupa array (banyak hasil)
                 if(Array.isArray(data) && data.length > 0) {
-                    // Petakan semua hasil jadi daftar ke bawah
                     searchResults.innerHTML = data.map(item => `
                         <div class="result-item" onclick="selectSong('${item.videoId}', '${item.title.replace(/'/g, "\\'")}', '${item.channel.replace(/'/g, "\\'")}')">
                             <div class="result-title">${item.title}</div>
@@ -92,11 +127,28 @@
             }
         });
 
+        // 4. Logika Pilih Lagu (Otomatis Play)
         function selectSong(videoId, title, channel) {
+            currentVideoId = videoId;
             document.getElementById('title').innerText = title;
             document.getElementById('artist').innerText = channel;
             document.getElementById('searchResults').style.display = 'none';
+            
+            // Perintahkan YouTube API memutar lagu ini
+            if (player && player.loadVideoById) {
+                player.loadVideoById(videoId);
+            }
         }
+
+        // 5. Fungsi Tombol Play/Pause Manual
+        document.getElementById('playBtn').addEventListener('click', () => {
+            if (!currentVideoId || !player) return; // Abaikan kalau belum milih lagu
+            if (isPlaying) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        });
     </script>
 </body>
 </html>
