@@ -32,14 +32,16 @@
         .progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; cursor: pointer; }
 
         .controls { display: flex; align-items: center; gap: 24px; }
-        .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
+        .play-btn:active { transform: scale(0.95); }
+        .nav-btn { background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px; transition: 0.2s; opacity: 0.7;}
+        .nav-btn:active { transform: scale(0.9); opacity: 1;}
+        .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
         
-        /* Area Lirik Sinkron */
         .lyrics-section { margin-top: 40px; width: 100%; box-sizing: border-box; }
         .lyrics-title { font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; text-align: center; display: none; }
         .lyrics-box { background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 24px 20px; font-size: 16px; line-height: 2.2; color: #555555; text-align: center; height: 350px; overflow-y: auto; display: none; scroll-behavior: smooth; position: relative;}
         
-        /* Baris Lirik */
         .lyric-line { transition: color 0.3s ease, transform 0.3s ease; padding: 4px 0; }
         .lyric-active { color: #ffffff; font-weight: bold; transform: scale(1.05); }
     </style>
@@ -77,8 +79,18 @@
         </div>
 
         <div class="controls">
+            <!-- Tombol Previous -->
+            <button id="prevBtn" class="nav-btn" disabled>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"></line></svg>
+            </button>
+            
             <button id="playBtn" class="play-btn">
                 <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
+            
+            <!-- Tombol Next -->
+            <button id="nextBtn" class="nav-btn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line></svg>
             </button>
         </div>
         
@@ -95,6 +107,11 @@
         let currentVideoId = '';
         let isPlaying = false;
         let progressInterval;
+        
+        // Variabel Histori Lagu
+        let playHistory = [];
+        let historyIndex = -1;
+
         let parsedLyrics = [];
         let currentLyricIndex = -1;
 
@@ -124,9 +141,8 @@
             const playIcon = document.getElementById('playIcon');
             const progressBar = document.getElementById('progressBar');
             
-            // LOGIKA AUTO-PLAY NEXT SONG (VIBES SAMA)
             if (event.data == YT.PlayerState.ENDED) {
-                playNextVibes();
+                playNextLogics(); // Otomatis ke lagu berikutnya jika habis
                 return;
             }
 
@@ -141,7 +157,7 @@
                     const current = player.getCurrentTime();
                     progressBar.value = current;
                     document.getElementById('currentTime').innerText = formatTime(current);
-                    syncLyrics(current); // Jalankan sinkronisasi lirik
+                    syncLyrics(current);
                 }, 500);
 
             } else {
@@ -151,7 +167,6 @@
             }
         }
 
-        // Fitur Geser Durasi
         document.getElementById('progressBar').addEventListener('input', (e) => {
             if(player && player.seekTo) {
                 player.seekTo(e.target.value, true);
@@ -193,18 +208,19 @@
             }
         }
 
-        // AUTO-PLAY: Mencari lagu dari artis yang sama
-        async function playNextVibes() {
-            const currentArtist = document.getElementById('artist').innerText;
-            const searchQ = currentArtist + " audio";
+        // Trik Mencari Lagu "Vibes" Serupa dari Artis Lain
+        async function fetchSimilarVibes() {
+            const currentTitle = playHistory[historyIndex].title;
+            const currentArtist = playHistory[historyIndex].channel;
             
-            document.getElementById('title').innerText = "Mencari lagu selanjutnya...";
+            // Tambahkan kata kunci "mix" agar YouTube memberikan playlist campuran
+            const searchQ = currentTitle + " " + currentArtist + " mix audio";
+            document.getElementById('title').innerText = "Mencari vibes serupa...";
             
             try {
                 const res = await fetch('/api/search?q=' + encodeURIComponent(searchQ));
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 1) {
-                    // Cari lagu secara acak yang bukan lagu saat ini
                     const filtered = data.filter(item => item.videoId !== currentVideoId);
                     const nextSong = filtered[Math.floor(Math.random() * filtered.length)] || data[0];
                     selectSong(nextSong.videoId, nextSong.title, nextSong.channel);
@@ -214,7 +230,34 @@
             }
         }
 
-        // FUNGSI TARIK LIRIK (Bisa Sinkron atau Teks Biasa)
+        // FUNGSI NAVIGASI TOMBOL NEXT & PREVIOUS
+        function updateNavButtons() {
+            document.getElementById('prevBtn').disabled = historyIndex <= 0;
+        }
+
+        function playNextLogics() {
+            if (!currentVideoId) return;
+            if (historyIndex < playHistory.length - 1) {
+                // Maju ke histori selanjutnya yang pernah kita lewati
+                historyIndex++;
+                const nextSong = playHistory[historyIndex];
+                loadSongToPlayer(nextSong.videoId, nextSong.title, nextSong.channel);
+            } else {
+                // Kalau sudah di ujung histori, cari vibes baru
+                fetchSimilarVibes();
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', playNextLogics);
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                const prevSong = playHistory[historyIndex];
+                loadSongToPlayer(prevSong.videoId, prevSong.title, prevSong.channel);
+            }
+        });
+
         async function fetchLyrics(rawTitle, artist) {
             const lyricsBox = document.getElementById('lyricsContainer');
             const lyricsTitle = document.getElementById('lyricsTitle');
@@ -248,11 +291,10 @@
             }
         }
 
-        // Memecah Lirik Sinkron ala Karaoke
         function parseSyncedLyrics(lrc) {
             const lines = lrc.split('\n');
             const regex = /\[(\d{2}):(\d{2}\.\d{2})\](.*)/;
-            let html = '<div style="height: 120px;"></div>'; // Ruang kosong atas
+            let html = '<div style="height: 120px;"></div>';
             
             lines.forEach((line, index) => {
                 const match = line.match(regex);
@@ -265,11 +307,10 @@
                     html += `<div id="lyric-${index}" class="lyric-line">${text}</div>`;
                 }
             });
-            html += '<div style="height: 150px;"></div>'; // Ruang kosong bawah
+            html += '<div style="height: 150px;"></div>';
             document.getElementById('lyricsContainer').innerHTML = html;
         }
 
-        // Menjalankan Sinkronisasi Lirik
         function syncLyrics(currentTime) {
             if (parsedLyrics.length === 0) return;
             
@@ -302,11 +343,11 @@
             }
         }
 
-        function selectSong(videoId, title, channel) {
+        // Fungsi internal untuk memuat lagu tanpa menambah histori
+        function loadSongToPlayer(videoId, title, channel) {
             currentVideoId = videoId;
             document.getElementById('title').innerText = title;
             document.getElementById('artist').innerText = channel;
-            document.getElementById('searchResults').style.display = 'none';
             
             document.getElementById('defaultIcon').style.display = 'none';
             const albumImg = document.getElementById('albumImage');
@@ -316,8 +357,24 @@
             if (player && player.loadVideoById) {
                 player.loadVideoById(videoId);
             }
-
+            updateNavButtons();
             fetchLyrics(title, channel);
+        }
+
+        // Fungsi yang dipanggil saat user menekan lagu dari daftar pencarian
+        function selectSong(videoId, title, channel) {
+            document.getElementById('searchResults').style.display = 'none';
+            
+            // Hapus sisa histori di depan jika kita mundur lalu memilih lagu baru
+            if (historyIndex < playHistory.length - 1) {
+                playHistory = playHistory.slice(0, historyIndex + 1);
+            }
+            
+            // Tambahkan ke histori
+            playHistory.push({videoId, title, channel});
+            historyIndex++;
+            
+            loadSongToPlayer(videoId, title, channel);
         }
 
         document.getElementById('playBtn').addEventListener('click', () => {
