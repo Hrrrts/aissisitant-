@@ -1,133 +1,68 @@
 <!DOCTYPE html>
-<html lang="id" data-bs-theme="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aisplayer - Smart Audio</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <title>Aisplayer</title>
     <style>
-        body { background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass-card { background: rgba(20, 25, 30, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(13, 202, 240, 0.2); border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        .album-art { width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, #0dcaf0, #6610f2); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(13, 202, 240, 0.3); transition: 0.5s; position: relative; overflow: hidden; }
-        .album-art.playing { animation: float 3s ease-in-out infinite; box-shadow: 0 15px 40px rgba(13, 202, 240, 0.5); }
-        .control-btn { background: none; border: none; color: #e0e0e0; font-size: 1.8rem; transition: 0.2s; }
-        .play-btn { font-size: 4rem; color: #0dcaf0; }
-        .like-btn { color: #6c757d; font-size: 1.5rem; transition: 0.3s; background: none; border: none; }
-        .like-btn.liked { color: #ff4757; transform: scale(1.2); }
-        .ai-input-group { background: #111; border-radius: 30px; padding: 5px 15px; border: 1px solid #333; transition: 0.3s; }
-        .ai-input { background: transparent; border: none; color: white; padding: 10px; width: 100%; outline: none; }
-        .progress-container { height: 8px; cursor: pointer; background-color: #222; border-radius: 4px; overflow: hidden; }
-        .progress-bar-custom { background: linear-gradient(90deg, #0dcaf0, #6610f2); height: 100%; width: 0%; }
-        #youtube-player-container { display: none; }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .playlist-canvas { background-color: #0f1319 !important; border-left: 1px solid rgba(13, 202, 240, 0.2); }
-        .playlist-item { background: #161b22; border: 1px solid #21262d; border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; }
+        .top-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .back-btn { color: #94a3b8; text-decoration: none; font-size: 24px; padding: 5px; }
+        
+        /* Area Pencarian */
+        .search-box { display: flex; gap: 10px; position: relative;}
+        .search-box input { flex: 1; padding: 15px 20px; border-radius: 30px; border: none; background-color: #1e293b; color: white; outline: none; font-size: 15px; }
+        .search-box button { background-color: #38bdf8; color: #0f172a; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; font-size: 18px; font-weight: bold;}
+        
+        /* Daftar Lagu Memanjang (Awalnya disembunyikan) */
+        .search-results { display: none; background-color: #1e293b; border-radius: 15px; margin-top: 15px; padding: 10px 0; max-height: 250px; overflow-y: auto; border: 1px solid #334155; }
+        .result-item { padding: 15px 20px; border-bottom: 1px solid #334155; font-size: 14px; cursor: pointer; }
+        .result-item:last-child { border-bottom: none; }
+        .result-item:active { background-color: #334155; }
+
+        /* Area Player */
+        .player-card { background: linear-gradient(145deg, #1e293b, #0f172a); padding: 30px 20px; border-radius: 25px; text-align: center; margin-top: 30px; border: 1px solid #334155; }
+        .album-art { width: 100%; aspect-ratio: 1/1; background: linear-gradient(45deg, #38bdf8, #818cf8); border-radius: 20px; margin-bottom: 25px; display: flex; justify-content: center; align-items: center; font-size: 60px;}
+        .song-title { font-size: 20px; font-weight: bold; margin: 0 0 10px 0; }
+        .controls { margin-top: 20px; }
+        .controls button { background: none; border: none; color: white; font-size: 30px; margin: 0 15px; padding: 10px; cursor: pointer;}
+        .play-btn { background-color: #38bdf8 !important; color: #0f172a !important; border-radius: 50%; width: 65px; height: 65px; display: inline-flex; justify-content: center; align-items: center; }
+
+        /* Area Lirik */
+        .lyrics-container { background-color: #1e293b; padding: 25px; border-radius: 20px; margin-top: 25px; font-size: 15px; line-height: 1.8; color: #cbd5e1; text-align: center; max-height: 300px; overflow-y: auto; border: 1px solid #334155; display: none; }
     </style>
 </head>
 <body>
-
-<nav class="navbar navbar-dark bg-transparent pt-4 px-3">
-    <a href="index.html" class="text-white text-decoration-none fs-4"><i class="bi bi-arrow-left"></i></a>
-    <span class="navbar-brand mb-0 h4 text-info fw-bold"><i class="bi bi-robot"></i> Aisplayer</span>
-    <button class="btn btn-link text-info p-0 fs-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#playlistCanvas"><i class="bi bi-music-note-list"></i></button>
-</nav>
-
-<div class="offcanvas offcanvas-end playlist-canvas text-bg-dark" tabindex="-1" id="playlistCanvas">
-    <div class="offcanvas-header border-bottom border-secondary">
-        <h5 class="offcanvas-title text-info"><i class="bi bi-heart-fill text-danger"></i> Playlist Favorit</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">←</a>
+        <h2 style="margin: 0; font-size: 18px; color: #cbd5e1;">Aisplayer</h2>
     </div>
-    <div class="offcanvas-body" id="playlist-container"></div>
-</div>
 
-<div class="container py-3 d-flex flex-column align-items-center">
-    <div class="glass-card p-4 w-100" style="max-width: 420px;">
-        <div class="ai-input-group d-flex align-items-center mb-4">
-            <i class="bi bi-mic-fill text-secondary me-2"></i>
-            <input type="text" id="search-input" class="ai-input" placeholder="Ais, putar lagu sedih indo...">
-            <button class="btn btn-info rounded-circle p-0 d-flex align-items-center justify-content-center" id="search-btn" style="width:40px; height:40px;"><i class="bi bi-send-fill text-dark"></i></button>
-        </div>
-        <div class="album-art mb-4" id="album-art"><i class="bi bi-soundwave text-white" style="font-size: 6rem; opacity: 0.9;"></i></div>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div style="width: 80%;">
-                <h5 class="fw-bold text-truncate mb-0" id="track-title">Ais Standby</h5>
-                <p class="text-info mb-0 small" id="track-status">Menunggu instruksi</p>
-            </div>
-            <button class="like-btn" id="like-btn"><i class="bi bi-heart-fill"></i></button>
-        </div>
-        <div class="d-flex justify-content-between text-secondary mb-2" style="font-size: 0.75rem;"><span id="current-time">0:00</span><span id="duration-time">0:00</span></div>
-        <div class="progress-container mb-4" id="progress-container"><div class="progress-bar-custom" id="progress-bar"></div></div>
-        <div class="d-flex justify-content-center align-items-center gap-4 mb-2">
-            <button class="control-btn" id="stop-btn"><i class="bi bi-stop-circle-fill"></i></button>
-            <button class="control-btn play-btn" id="play-pause-btn"><i class="bi bi-play-circle-fill"></i></button>
-            <button class="control-btn" id="lyrics-btn" title="Cari Lirik"><i class="bi bi-mic-fill"></i></button>
-        </div>
+    <!-- Kotak Pencarian -->
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Ketik nama lagu & penyanyi...">
+        <button id="searchBtn">🔍</button>
     </div>
-</div>
 
-<div id="youtube-player-container"><div id="player"></div></div>
+    <!-- Wadah Daftar Pencarian -->
+    <div id="searchResults" class="search-results">
+        <!-- Hasil lagu akan muncul di sini nanti -->
+    </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let player, isPlaying = false, progressInterval, currentVideoId = "", currentVideoTitle = "", favoriteSongs = [];
-    const els = { play: document.getElementById('play-pause-btn'), stop: document.getElementById('stop-btn'), search: document.getElementById('search-btn'), input: document.getElementById('search-input'), title: document.getElementById('track-title'), status: document.getElementById('track-status'), art: document.getElementById('album-art'), cur: document.getElementById('current-time'), dur: document.getElementById('duration-time'), prog: document.getElementById('progress-bar'), progCont: document.getElementById('progress-container'), like: document.getElementById('like-btn'), lyrics: document.getElementById('lyrics-btn'), plist: document.getElementById('playlist-container') };
+    <!-- Player Utama -->
+    <div class="player-card">
+        <div class="album-art">🎵</div>
+        <p class="song-title" id="title">Ais Standby</p>
+        <div class="controls">
+            <button id="playBtn" class="play-btn">▶</button>
+        </div>
+        <!-- Wadah Audio -->
+        <div id="playerContainer" style="display: none;"></div>
+    </div>
 
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', { height: '10', width: '10', videoId: '', playerVars: { 'playsinline': 1, 'controls': 0 }, events: { 'onReady': () => { els.status.textContent = "Sistem Online & Secure"; loadFavorites(); }, 'onStateChange': onStateChange }});
-    }
-
-    function onStateChange(e) {
-        if (e.data == YT.PlayerState.PLAYING) {
-            isPlaying = true; els.status.textContent = "Memutar Audio 🔴"; els.art.classList.add('playing'); updatePlayBtn();
-            els.dur.textContent = fmtTime(player.getDuration()); progressInterval = setInterval(updateProg, 1000);
-        } else if (e.data == YT.PlayerState.PAUSED) {
-            isPlaying = false; els.status.textContent = "Paused"; els.art.classList.remove('playing'); updatePlayBtn(); clearInterval(progressInterval);
-        } else if (e.data == YT.PlayerState.ENDED) {
-            isPlaying = false; els.art.classList.remove('playing'); updatePlayBtn(); clearInterval(progressInterval); els.prog.style.width = '0%';
-        }
-    }
-
-    function fmtTime(t) { if(!t) return "0:00"; const m=Math.floor(t/60), s=Math.floor(t%60); return `${m}:${s<10?'0':''}${s}`; }
-    function updateProg() { if(player&&isPlaying){ const c=player.getCurrentTime(), d=player.getDuration(); els.cur.textContent=fmtTime(c); els.prog.style.width=`${(c/d)*100}%`; }}
-    els.progCont.addEventListener('click', (e) => { if(player&&player.getDuration()>0) player.seekTo((e.offsetX/els.progCont.clientWidth)*player.getDuration(), true); });
-
-    els.search.addEventListener('click', () => {
-        let q = els.input.value.trim(); if(!q) return;
-        els.title.textContent = "Ais sedang memproses..."; els.status.textContent = "Mengamankan request...";
-        fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(d => {
-            if (d.videoId) {
-                currentVideoId = d.videoId; currentVideoTitle = d.title; els.title.textContent = currentVideoTitle;
-                els.status.textContent = "Memuat audio..."; player.loadVideoById(currentVideoId); checkIfLiked();
-            } else { els.title.textContent = "Lagu tidak ditemukan"; els.status.textContent = "Coba instruksi lain"; }
-        });
-    });
-    els.input.addEventListener("keypress", (e) => { if(e.key==="Enter") els.search.click(); });
-
-    els.play.addEventListener('click', () => { if(!player||!player.getVideoUrl()) return; isPlaying ? player.pauseVideo() : player.playVideo(); });
-    els.stop.addEventListener('click', () => { if(player) { player.stopVideo(); isPlaying=false; els.art.classList.remove('playing'); updatePlayBtn(); }});
-    els.lyrics.addEventListener('click', () => { if(!currentVideoTitle) return; window.open(`https://www.google.com/search?q=lirik+lagu+${encodeURIComponent(currentVideoTitle.replace(/(\(|\[).*(\)|\])/g,"").trim())}`, '_blank'); });
-    function updatePlayBtn() { els.play.innerHTML = isPlaying ? '<i class="bi bi-pause-circle-fill"></i>' : '<i class="bi bi-play-circle-fill"></i>'; }
-
-    function loadFavorites() { fetch('/api/favorites').then(r=>r.json()).then(d => { favoriteSongs = d; renderPlaylist(); checkIfLiked(); }); }
-    function renderPlaylist() {
-        if(favoriteSongs.length===0){ els.plist.innerHTML='<p class="text-muted text-center small">Belum ada lagu kesukaan.</p>'; return; }
-        els.plist.innerHTML='';
-        favoriteSongs.forEach(s => {
-            const div=document.createElement('div'); div.className='playlist-item p-3 d-flex align-items-center';
-            div.innerHTML=`<i class="bi bi-play-fill text-info me-2"></i> <span class="text-white text-truncate small w-100">${s.title}</span>`;
-            div.onclick = () => { currentVideoId=s.id; currentVideoTitle=s.title; els.title.textContent=currentVideoTitle; player.loadVideoById(currentVideoId); bootstrap.Offcanvas.getInstance(document.getElementById('playlistCanvas')).hide(); };
-            els.plist.appendChild(div);
-        });
-    }
-
-    els.like.addEventListener('click', () => {
-        if(!currentVideoId) return;
-        fetch('/api/favorites', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:currentVideoId, title:currentVideoTitle}) })
-        .then(r=>r.json()).then(d => { if(d.status==='liked') els.like.classList.add('liked'); else els.like.classList.remove('liked'); loadFavorites(); });
-    });
-    function checkIfLiked() { if(favoriteSongs.some(s=>s.id===currentVideoId)) els.like.classList.add('liked'); else els.like.classList.remove('liked'); }
-</script>
+    <!-- Wadah Lirik Lagu -->
+    <div id="lyricsContainer" class="lyrics-container">
+        <!-- Teks Lirik akan muncul di sini nanti -->
+    </div>
 </body>
 </html>
