@@ -10,8 +10,16 @@
         .header h1 { font-size: 28px; font-weight: 700; margin: 0; color: #ffffff; letter-spacing: -0.5px; }
         .header p { color: #888888; font-size: 14px; margin-top: 6px; }
         
-        /* Widget Quotes Harian */
-        .quote-widget { background: linear-gradient(135deg, #111111, #1a1a1a); border-left: 3px solid #ffffff; padding: 18px 20px; border-radius: 0 12px 12px 0; margin-bottom: 35px; display: none; }
+        /* SLIDER QUOTES WIDGET */
+        .quote-widget { background: linear-gradient(135deg, #111111, #1a1a1a); border-left: 3px solid #ffffff; padding: 18px 20px; border-radius: 0 12px 12px 0; margin-bottom: 35px; display: none; position: relative; min-height: 45px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+        .quote-slide { display: none; animation: slideIn 0.8s ease forwards; }
+        .quote-slide.active { display: block; }
+        
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateX(20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
         .quote-text { margin: 0; font-size: 13px; color: #dddddd; line-height: 1.6; font-style: italic; }
         .quote-author { margin: 8px 0 0 0; font-size: 11px; color: #777777; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -29,16 +37,12 @@
         <p>Sistem Personal Backend</p>
     </div>
 
-    <!-- Widget Quotes (Hanya muncul kalau ada isinya) -->
-    <div class="quote-widget" id="quoteWidget">
-        <p class="quote-text" id="quoteText"></p>
-        <p class="quote-author">- Harits</p>
-    </div>
+    <div class="quote-widget" id="quoteWidget"></div>
     
     <a href="music.html" class="card">
         <div class="card-left">
             <div class="icon-box">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
             </div>
             <div>
                 <p class="card-title">Aismusic</p>
@@ -46,14 +50,14 @@
             </div>
         </div>
         <div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
     </a>
 
     <a href="ideas.html" class="card">
         <div class="card-left">
             <div class="icon-box">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             </div>
             <div>
                 <p class="card-title">Bubble Ideas</p>
@@ -61,16 +65,48 @@
             </div>
         </div>
         <div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
     </a>
 
     <script>
-        // Cek memori lokal, kalau ada quotes, tampilkan. Kalau kosong, sembunyikan.
-        const savedQuote = localStorage.getItem('my_quote');
-        if (savedQuote && savedQuote.trim() !== '') {
-            document.getElementById('quoteWidget').style.display = 'block';
-            document.getElementById('quoteText').innerText = '"' + savedQuote + '"';
+        // TARIK SEMUA QUOTES
+        let quotes = JSON.parse(localStorage.getItem('ais_quotes_list')) || [];
+        
+        // Pindahkan sisa quote sistem lama kalau lu belum hapus
+        const oldQuote = localStorage.getItem('my_quote');
+        if (oldQuote) { 
+            quotes.push(oldQuote); 
+            localStorage.setItem('ais_quotes_list', JSON.stringify(quotes));
+            localStorage.removeItem('my_quote'); 
+        }
+
+        // RENDER SLIDER
+        if (quotes.length > 0) {
+            const widget = document.getElementById('quoteWidget');
+            widget.style.display = 'block';
+            
+            let html = '';
+            quotes.forEach((q, index) => {
+                html += `
+                <div class="quote-slide ${index === 0 ? 'active' : ''}">
+                    <p class="quote-text">"${q}"</p>
+                    <p class="quote-author">- HARITS</p>
+                </div>`;
+            });
+            widget.innerHTML = html;
+
+            // LOGIKA GANTI OTOMATIS TIAP 5 DETIK
+            if (quotes.length > 1) {
+                let currentIndex = 0;
+                const slides = document.querySelectorAll('.quote-slide');
+                
+                setInterval(() => {
+                    slides[currentIndex].classList.remove('active');
+                    currentIndex = (currentIndex + 1) % slides.length;
+                    slides[currentIndex].classList.add('active');
+                }, 5000);
+            }
         }
     </script>
 </body>
