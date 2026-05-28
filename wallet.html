@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dompet Ais</title>
+    <style>
+        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
+        .top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
+        .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+        .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+        
+        /* Kartu Saldo */
+        .balance-card { background: linear-gradient(135deg, #1a1a1a, #111111); border: 1px solid #2a2a2a; border-radius: 20px; padding: 30px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+        .balance-title { font-size: 13px; color: #888888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;}
+        .balance-amount { font-size: 36px; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: -1px;}
+        
+        /* Tombol Aksi */
+        .action-buttons { display: flex; gap: 15px; margin-bottom: 30px; }
+        .btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .btn:active { transform: scale(0.96); }
+        .btn-income { background-color: #1a2e1a; color: #4ade80; border: 1px solid #224422; }
+        .btn-expense { background-color: #2e1a1a; color: #f87171; border: 1px solid #442222; }
+
+        /* Form Input (Awalnya Sembunyi) */
+        .input-section { background: #111; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 30px; display: none; animation: slideDown 0.3s ease;}
+        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+        .input-box { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 12px; box-sizing: border-box;}
+        .input-box:focus { border-color: #555; }
+        .btn-submit { background: #fff; color: #000; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer;}
+        
+        /* Histori Transaksi */
+        .section-title { font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: 600; }
+        .history-list { display: flex; flex-direction: column; gap: 12px; }
+        .tx-card { background: #111; border: 1px solid #222; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;}
+        .tx-info { display: flex; flex-direction: column; gap: 4px; }
+        .tx-desc { font-size: 15px; font-weight: 600; color: #fff; }
+        .tx-date { font-size: 11px; color: #666; }
+        .tx-amount { font-size: 15px; font-weight: bold; }
+        .text-green { color: #4ade80; }
+        .text-red { color: #f87171; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <h2 class="title-header">Dompet Ais</h2>
+        <div style="width:24px;"></div>
+    </div>
+
+    <div class="balance-card">
+        <div class="balance-title">Total Saldo</div>
+        <h1 class="balance-amount" id="balanceText">Rp 0</h1>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn btn-income" onclick="showForm('income')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+            Pemasukan
+        </button>
+        <button class="btn btn-expense" onclick="showForm('expense')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+            Pengeluaran
+        </button>
+    </div>
+
+    <div class="input-section" id="inputSection">
+        <h3 id="formTitle" style="margin-top:0; margin-bottom:15px; font-size:16px;">Tambah Catatan</h3>
+        <input type="number" id="txAmount" class="input-box" placeholder="Nominal (Cth: 50000)">
+        <input type="text" id="txDesc" class="input-box" placeholder="Keterangan (Cth: Jual Kurma)">
+        <input type="hidden" id="txType">
+        <button class="btn-submit" onclick="submitTransaction()">Simpan ke Database</button>
+    </div>
+
+    <div class="section-title">Riwayat Transaksi</div>
+    <div class="history-list" id="historyList">
+        <p style="text-align:center; color:#555; font-size:13px;">Memuat data dari server...</p>
+    </div>
+
+    <script>
+        // Format Rupiah
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
+        // Ambil Data dari MongoDB
+        async function loadWallet() {
+            try {
+                const res = await fetch('/api/wallet');
+                const data = await res.json();
+                
+                document.getElementById('balanceText').innerText = formatRupiah(data.balance);
+                
+                const list = document.getElementById('historyList');
+                if (data.txs.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:#555; font-size:13px;">Belum ada transaksi.</p>';
+                    return;
+                }
+
+                list.innerHTML = data.txs.map(tx => {
+                    const dateObj = new Date(tx.date);
+                    const dateStr = dateObj.toLocaleDateString('id-ID', {day:'numeric', month:'short'}) + ' • ' + dateObj.getHours() + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                    const isIncome = tx.type === 'income';
+                    
+                    return `
+                    <div class="tx-card">
+                        <div class="tx-info">
+                            <div class="tx-desc">${tx.desc}</div>
+                            <div class="tx-date">${dateStr}</div>
+                        </div>
+                        <div class="tx-amount ${isIncome ? 'text-green' : 'text-red'}">
+                            ${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                document.getElementById('historyList').innerHTML = '<p style="color:#ff4444; text-align:center;">Gagal terhubung ke database.</p>';
+            }
+        }
+
+        function showForm(type) {
+            const section = document.getElementById('inputSection');
+            section.style.display = 'block';
+            document.getElementById('txType').value = type;
+            
+            const title = document.getElementById('formTitle');
+            if(type === 'income') {
+                title.innerText = 'Catat Pemasukan';
+                title.style.color = '#4ade80';
+            } else {
+                title.innerText = 'Catat Pengeluaran';
+                title.style.color = '#f87171';
+            }
+        }
+
+        async function submitTransaction() {
+            const amount = document.getElementById('txAmount').value;
+            const desc = document.getElementById('txDesc').value;
+            const type = document.getElementById('txType').value;
+
+            if(!amount || !desc) return alert("Isi nominal dan keterangan dulu!");
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = 'Menyimpan...';
+
+            try {
+                const res = await fetch('/api/wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, amount, desc })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    document.getElementById('txAmount').value = '';
+                    document.getElementById('txDesc').value = '';
+                    document.getElementById('inputSection').style.display = 'none';
+                    btn.innerText = 'Simpan ke Database';
+                    loadWallet(); // Refresh UI
+                }
+            } catch (error) {
+                alert("Gagal menyimpan ke server!");
+                btn.innerText = 'Simpan ke Database';
+            }
+        }
+
+        // Jalankan saat halaman dibuka
+        loadWallet();
+    </script>
+</body>
+</html>
