@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ais Journal</title>
+    <style>
+        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; margin-top: 10px; }
+        .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+        .title-header { font-size: 15px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase;}
+        
+        /* Tombol Tulis Baru */
+        .btn-write { background: linear-gradient(135deg, #ffffff, #dddddd); color: #000; width: 100%; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 15px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.1); transition: 0.2s; margin-bottom: 30px;}
+        .btn-write:active { transform: scale(0.97); }
+
+        /* Timeline Jurnal */
+        .timeline { display: flex; flex-direction: column; gap: 20px; }
+        .journal-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 20px; position: relative;}
+        .j-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 12px;}
+        .j-title { font-size: 16px; font-weight: bold; color: #fff; margin: 0 0 4px 0;}
+        .j-date { font-size: 11px; color: #888; }
+        .j-mood { font-size: 24px; background: #222; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px;}
+        .j-content { font-size: 14px; line-height: 1.6; color: #ccc; }
+        .j-content img { max-width: 100%; border-radius: 8px; margin-top: 10px; }
+        .btn-delete { position: absolute; bottom: 20px; right: 20px; background: none; border: none; color: #f87171; font-size: 18px; cursor: pointer; padding: 5px;}
+
+        /* Overlay Editor */
+        .editor-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0a0a0a; z-index: 100; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); padding: 20px;}
+        .editor-overlay.open { transform: translateY(0); }
+        .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-top: 10px;}
+        .btn-close { background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; }
+        .btn-save { background: #4ade80; color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;}
+        
+        .input-title { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-size: 20px; font-weight: bold; padding: 10px 0; outline: none; margin-bottom: 20px; width: 100%; font-family: inherit;}
+        
+        .mood-selector { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
+        .mood-btn { background: #1a1a1a; border: 1px solid #333; font-size: 24px; padding: 10px; border-radius: 12px; cursor: pointer; transition: 0.2s; flex-shrink: 0;}
+        .mood-btn.selected { background: #333; border-color: #fff; transform: scale(1.1);}
+
+        /* Rich Text Toolbar */
+        .toolbar { display: flex; gap: 8px; background: #1a1a1a; padding: 10px; border-radius: 12px 12px 0 0; border: 1px solid #333; border-bottom: none;}
+        .tool-btn { background: none; border: none; color: #fff; font-size: 16px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .tool-btn:active { background: #333; }
+        
+        /* Area Nulis */
+        .rich-editor { flex: 1; background: #111; border: 1px solid #333; border-radius: 0 0 12px 12px; padding: 15px; color: #fff; font-size: 15px; line-height: 1.6; outline: none; overflow-y: auto;}
+        .rich-editor:empty:before { content: "Ceritain hari lu di sini..."; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <h2 class="title-header">Ais Journal</h2>
+        <div style="width:24px;"></div>
+    </div>
+
+    <button class="btn-write" onclick="openEditor()">+ Tulis Jurnal Baru</button>
+
+    <div class="timeline" id="journalList">
+        <p style="text-align:center; color:#555; font-size:13px;">Memuat catatan lu...</p>
+    </div>
+
+    <!-- Jendela Nulis Jurnal (Overlay) -->
+    <div class="editor-overlay" id="editorOverlay">
+        <div class="editor-header">
+            <button class="btn-close" onclick="closeEditor()">×</button>
+            <span style="font-weight:bold; color:#888; font-size:14px;">Catatan Baru</span>
+            <button class="btn-save" id="saveBtn" onclick="saveJournal()">Simpan</button>
+        </div>
+
+        <input type="text" id="jTitle" class="input-title" placeholder="Judul Jurnal...">
+        
+        <div style="font-size:12px; color:#888; margin-bottom:8px;">Mood lu hari ini:</div>
+        <div class="mood-selector">
+            <button class="mood-btn selected" onclick="selectMood(this, '😃')">😃</button>
+            <button class="mood-btn" onclick="selectMood(this, '😌')">😌</button>
+            <button class="mood-btn" onclick="selectMood(this, '😔')">😔</button>
+            <button class="mood-btn" onclick="selectMood(this, '😡')">😡</button>
+            <button class="mood-btn" onclick="selectMood(this, '🤯')">🤯</button>
+            <button class="mood-btn" onclick="selectMood(this, '🤒')">🤒</button>
+        </div>
+
+        <div class="toolbar">
+            <button class="tool-btn" onclick="formatText('bold')" style="font-weight:bold;">B</button>
+            <button class="tool-btn" onclick="formatText('italic')" style="font-style:italic;">I</button>
+            <button class="tool-btn" onclick="formatText('underline')" style="text-decoration:underline;">U</button>
+            <button class="tool-btn" onclick="formatText('insertUnorderedList')">•</button>
+        </div>
+        
+        <!-- Kotak Editor Rich Text -->
+        <div id="jContent" class="rich-editor" contenteditable="true"></div>
+    </div>
+
+    <script>
+        let currentMood = '😃';
+
+        function openEditor() {
+            document.getElementById('editorOverlay').classList.add('open');
+            history.pushState({ modal: 'editor' }, ''); 
+        }
+
+        function closeEditor() {
+            document.getElementById('editorOverlay').classList.remove('open');
+        }
+
+        window.addEventListener('popstate', (e) => {
+            const editor = document.getElementById('editorOverlay');
+            if (editor.classList.contains('open')) {
+                editor.classList.remove('open');
+            }
+        });
+
+        function selectMood(element, mood) {
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+            currentMood = mood;
+        }
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('jContent').focus();
+        }
+
+        async function loadJournals() {
+            try {
+                const res = await fetch('/api/journal');
+                const entries = await res.json();
+                
+                const list = document.getElementById('journalList');
+                if (entries.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:#555; font-size:13px;">Buku harian lu masih kosong.</p>';
+                    return;
+                }
+
+                list.innerHTML = entries.map(j => {
+                    const d = new Date(j.date);
+                    const dateStr = d.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + ' • ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+                    
+                    return `
+                    <div class="journal-card">
+                        <div class="j-header">
+                            <div>
+                                <h3 class="j-title">${j.title}</h3>
+                                <div class="j-date">${dateStr}</div>
+                            </div>
+                            <div class="j-mood">${j.mood}</div>
+                        </div>
+                        <div class="j-content">${j.content}</div>
+                        <button class="btn-delete" onclick="deleteJournal('${j._id}')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                document.getElementById('journalList').innerHTML = '<p style="text-align:center; color:#f87171;">Gagal memuat jurnal.</p>';
+            }
+        }
+
+        async function saveJournal() {
+            const title = document.getElementById('jTitle').value;
+            const content = document.getElementById('jContent').innerHTML;
+            
+            if(!content.trim()) return alert("Isi jurnalnya dulu bro!");
+
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = 'Tunggu...';
+            btn.disabled = true;
+
+            try {
+                await fetch('/api/journal', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ title, content, mood: currentMood })
+                });
+                
+                // Bersihin form
+                document.getElementById('jTitle').value = '';
+                document.getElementById('jContent').innerHTML = '';
+                selectMood(document.querySelector('.mood-btn'), '😃'); // Reset mood
+                
+                closeEditor();
+                loadJournals();
+            } catch (e) {
+                alert("Gagal nyimpen jurnal.");
+            } finally {
+                btn.innerText = 'Simpan';
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteJournal(id) {
+            if(!confirm('Yakin mau hapus catatan ini selamanya?')) return;
+            try {
+                await fetch('/api/journal', {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id })
+                });
+                loadJournals();
+            } catch (e) {
+                alert("Gagal menghapus.");
+            }
+        }
+
+        loadJournals();
+    </script>
+</body>
+</html>
