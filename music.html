@@ -26,7 +26,6 @@
         .song-title { font-size: 20px; font-weight: 700; margin: 0 0 6px 0; text-align: center; color: #ffffff; }
         .song-artist { font-size: 14px; color: #888888; margin: 0 0 20px 0; text-align: center; }
         
-        /* Bar Durasi Waktu */
         .progress-container { width: 100%; max-width: 320px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
         .time-text { font-size: 12px; color: #888888; width: 35px; text-align: center; font-variant-numeric: tabular-nums; }
         .progress-bar { flex: 1; height: 4px; -webkit-appearance: none; background: #333333; border-radius: 2px; outline: none; }
@@ -35,10 +34,14 @@
         .controls { display: flex; align-items: center; gap: 24px; }
         .play-btn { width: 64px; height: 64px; border-radius: 50%; background: #ffffff; color: #000000; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         
-        /* Box Lirik Baru */
+        /* Area Lirik Sinkron */
         .lyrics-section { margin-top: 40px; width: 100%; box-sizing: border-box; }
         .lyrics-title { font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; text-align: center; display: none; }
-        .lyrics-box { background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 24px; font-size: 14px; line-height: 2.2; color: #dddddd; text-align: center; max-height: 400px; overflow-y: auto; display: none; }
+        .lyrics-box { background: #111111; border: 1px solid #222222; border-radius: 16px; padding: 24px 20px; font-size: 16px; line-height: 2.2; color: #555555; text-align: center; height: 350px; overflow-y: auto; display: none; scroll-behavior: smooth; position: relative;}
+        
+        /* Baris Lirik */
+        .lyric-line { transition: color 0.3s ease, transform 0.3s ease; padding: 4px 0; }
+        .lyric-active { color: #ffffff; font-weight: bold; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -92,6 +95,8 @@
         let currentVideoId = '';
         let isPlaying = false;
         let progressInterval;
+        let parsedLyrics = [];
+        let currentLyricIndex = -1;
 
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -119,20 +124,25 @@
             const playIcon = document.getElementById('playIcon');
             const progressBar = document.getElementById('progressBar');
             
+            // LOGIKA AUTO-PLAY NEXT SONG (VIBES SAMA)
+            if (event.data == YT.PlayerState.ENDED) {
+                playNextVibes();
+                return;
+            }
+
             if (event.data == YT.PlayerState.PLAYING) {
                 isPlaying = true;
                 playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
                 
-                // Set maksimal slider sesuai durasi lagu
                 progressBar.max = player.getDuration();
                 document.getElementById('durationTime').innerText = formatTime(player.getDuration());
                 
-                // Update slider setiap detik
                 progressInterval = setInterval(() => {
                     const current = player.getCurrentTime();
                     progressBar.value = current;
                     document.getElementById('currentTime').innerText = formatTime(current);
-                }, 1000);
+                    syncLyrics(current); // Jalankan sinkronisasi lirik
+                }, 500);
 
             } else {
                 isPlaying = false;
@@ -141,11 +151,12 @@
             }
         }
 
-        // Fitur Geser Durasi (Seeker)
+        // Fitur Geser Durasi
         document.getElementById('progressBar').addEventListener('input', (e) => {
             if(player && player.seekTo) {
                 player.seekTo(e.target.value, true);
                 document.getElementById('currentTime').innerText = formatTime(e.target.value);
+                syncLyrics(e.target.value);
             }
         });
 
@@ -156,7 +167,10 @@
         searchBtn.addEventListener('click', async () => {
             const query = searchInput.value;
             if (!query) return;
-            
+            executeSearch(query);
+        });
+
+        async function executeSearch(query) {
             searchResults.style.display = 'block';
             searchResults.innerHTML = '<div class="result-item" style="text-align:center;">Mencari...</div>';
             
@@ -177,40 +191,114 @@
             } catch (error) {
                 searchResults.innerHTML = '<div class="result-item">Koneksi ke server terputus.</div>';
             }
-        });
+        }
 
+        // AUTO-PLAY: Mencari lagu dari artis yang sama
+        async function playNextVibes() {
+            const currentArtist = document.getElementById('artist').innerText;
+            const searchQ = currentArtist + " audio";
+            
+            document.getElementById('title').innerText = "Mencari lagu selanjutnya...";
+            
+            try {
+                const res = await fetch('/api/search?q=' + encodeURIComponent(searchQ));
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 1) {
+                    // Cari lagu secara acak yang bukan lagu saat ini
+                    const filtered = data.filter(item => item.videoId !== currentVideoId);
+                    const nextSong = filtered[Math.floor(Math.random() * filtered.length)] || data[0];
+                    selectSong(nextSong.videoId, nextSong.title, nextSong.channel);
+                }
+            } catch (e) {
+                console.log("Auto-play gagal.");
+            }
+        }
+
+        // FUNGSI TARIK LIRIK (Bisa Sinkron atau Teks Biasa)
         async function fetchLyrics(rawTitle, artist) {
             const lyricsBox = document.getElementById('lyricsContainer');
             const lyricsTitle = document.getElementById('lyricsTitle');
             
             lyricsTitle.style.display = 'block';
             lyricsBox.style.display = 'block';
-            lyricsBox.innerHTML = '<i style="color:#777;">Mencari lirik...</i>';
+            lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Mencari lirik...</i></div>';
+            parsedLyrics = [];
+            currentLyricIndex = -1;
 
-            // 1. Bersihkan tanda kurung
             let cleanTitle = rawTitle.replace(/\[.*?\]|\(.*?\)/g, '').trim();
-            
-            // 2. Jika judul YouTube digabung "Artis - Judul", kita pisahkan
-            let searchQuery = cleanTitle;
-            if (cleanTitle.includes('-')) {
-                let parts = cleanTitle.split('-');
-                searchQuery = parts[1].trim() + ' ' + parts[0].trim(); // Dibalik jadi "Judul Artis"
-            } else {
-                searchQuery = cleanTitle + ' ' + artist;
-            }
+            let searchQuery = cleanTitle.includes('-') ? (cleanTitle.split('-')[1].trim() + ' ' + cleanTitle.split('-')[0].trim()) : (cleanTitle + ' ' + artist);
 
             try {
                 const res = await fetch('https://lrclib.net/api/search?q=' + encodeURIComponent(searchQuery));
                 const data = await res.json();
 
-                if (data && data.length > 0 && data[0].plainLyrics) {
-                    const formattedLyrics = data[0].plainLyrics.replace(/\n/g, '<br>');
-                    lyricsBox.innerHTML = formattedLyrics;
+                if (data && data.length > 0) {
+                    if (data[0].syncedLyrics) {
+                        parseSyncedLyrics(data[0].syncedLyrics);
+                    } else if (data[0].plainLyrics) {
+                        lyricsBox.innerHTML = data[0].plainLyrics.replace(/\n/g, '<br><br>');
+                    } else {
+                        lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Lirik tidak ditemukan.</i></div>';
+                    }
                 } else {
-                    lyricsBox.innerHTML = '<i style="color:#777;">Maaf, lirik tidak ditemukan untuk lagu ini.</i>';
+                    lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Maaf, lirik tidak ditemukan untuk lagu ini.</i></div>';
                 }
             } catch (e) {
-                lyricsBox.innerHTML = '<i style="color:#777;">Gagal memuat lirik (koneksi terputus).</i>';
+                lyricsBox.innerHTML = '<div style="margin-top:40%;"><i style="color:#777;">Gagal memuat lirik (koneksi terputus).</i></div>';
+            }
+        }
+
+        // Memecah Lirik Sinkron ala Karaoke
+        function parseSyncedLyrics(lrc) {
+            const lines = lrc.split('\n');
+            const regex = /\[(\d{2}):(\d{2}\.\d{2})\](.*)/;
+            let html = '<div style="height: 120px;"></div>'; // Ruang kosong atas
+            
+            lines.forEach((line, index) => {
+                const match = line.match(regex);
+                if (match) {
+                    const min = parseInt(match[1]);
+                    const sec = parseFloat(match[2]);
+                    const time = (min * 60) + sec;
+                    const text = match[3].trim() || '🎵';
+                    parsedLyrics.push({ time, text, id: 'lyric-' + index });
+                    html += `<div id="lyric-${index}" class="lyric-line">${text}</div>`;
+                }
+            });
+            html += '<div style="height: 150px;"></div>'; // Ruang kosong bawah
+            document.getElementById('lyricsContainer').innerHTML = html;
+        }
+
+        // Menjalankan Sinkronisasi Lirik
+        function syncLyrics(currentTime) {
+            if (parsedLyrics.length === 0) return;
+            
+            let activeIndex = -1;
+            for (let i = 0; i < parsedLyrics.length; i++) {
+                if (currentTime >= parsedLyrics[i].time) {
+                    activeIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
+                if (currentLyricIndex !== -1) {
+                    const oldEl = document.getElementById(parsedLyrics[currentLyricIndex].id);
+                    if (oldEl) oldEl.classList.remove('lyric-active');
+                }
+                
+                currentLyricIndex = activeIndex;
+                const newEl = document.getElementById(parsedLyrics[activeIndex].id);
+                
+                if (newEl) {
+                    newEl.classList.add('lyric-active');
+                    const container = document.getElementById('lyricsContainer');
+                    container.scrollTo({
+                        top: newEl.offsetTop - (container.clientHeight / 2),
+                        behavior: 'smooth'
+                    });
+                }
             }
         }
 
@@ -220,7 +308,6 @@
             document.getElementById('artist').innerText = channel;
             document.getElementById('searchResults').style.display = 'none';
             
-            // Tampilkan Thumbnail Album
             document.getElementById('defaultIcon').style.display = 'none';
             const albumImg = document.getElementById('albumImage');
             albumImg.src = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
