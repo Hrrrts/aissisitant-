@@ -12,33 +12,48 @@ module.exports = async (req, res) => {
         const collection = db.collection('tasks');
 
         if (req.method === 'POST') {
-            // Nambah tugas baru
             const { text } = req.body;
             if (!text) return res.status(400).json({error: 'Teks kosong'});
 
             await collection.insertOne({ 
                 text, 
-                status: 'todo', // Default kolom pertama
-                createdAt: new Date() 
+                status: 'todo',
+                createdAt: new Date(),
+                progressNote: '',
+                completedAt: null
             });
             res.status(200).json({ success: true });
             
         } else if (req.method === 'GET') {
-            // Ambil semua tugas
             const tasks = await collection.find({}).sort({ createdAt: -1 }).toArray();
             res.status(200).json(tasks);
             
         } else if (req.method === 'PUT') {
-            // Mindahin tugas (Update status)
-            const { id, newStatus } = req.body;
+            const { id, newStatus, progressNote } = req.body;
+            let updateData = {};
+
+            // Kalau ada update status
+            if (newStatus) {
+                updateData.status = newStatus;
+                if (newStatus === 'done') {
+                    updateData.completedAt = new Date(); // Catat waktu selesai
+                } else {
+                    updateData.completedAt = null; // Reset kalau dibalikin ke proses/belum
+                }
+            }
+
+            // Kalau ada update catatan progres
+            if (progressNote !== undefined) {
+                updateData.progressNote = progressNote;
+            }
+
             await collection.updateOne(
                 { _id: new ObjectId(id) },
-                { $set: { status: newStatus } }
+                { $set: updateData }
             );
             res.status(200).json({ success: true });
 
         } else if (req.method === 'DELETE') {
-            // Hapus tugas
             const { id } = req.body;
             await collection.deleteOne({ _id: new ObjectId(id) });
             res.status(200).json({ success: true });
