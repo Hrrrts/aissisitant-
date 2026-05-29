@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ais Fitness</title>
+    <style>
+        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
+        .top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; }
+        .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+        .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+        
+        .date-display { text-align: center; font-size: 14px; color: #888; margin-bottom: 30px; letter-spacing: 1px; font-weight: 600;}
+        
+        .section-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 20px; position: relative;}
+        .section-title { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin: 0 0 15px 0;}
+        
+        /* Protein Tracker */
+        .protein-stats { text-align: center; margin-bottom: 20px; }
+        .protein-big { font-size: 42px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -1px;}
+        .protein-target { font-size: 14px; color: #888; margin-top: 4px;}
+        
+        .progress-bg { background: #222; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 25px; border: 1px solid #333;}
+        .progress-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); height: 100%; width: 0%; transition: width 0.5s ease, background 0.3s ease; }
+        .progress-fill.done { background: linear-gradient(90deg, #10b981, #34d399); } /* Hijau kalau target tercapai */
+
+        .flex-row { display: flex; gap: 10px; margin-bottom: 15px;}
+        .input-box { flex: 1; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; font-family: inherit;}
+        .input-box:focus { border-color: #555; }
+        .btn-action { background: #fff; color: #000; border: none; padding: 14px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .btn-action:active { transform: scale(0.95); }
+        .btn-reset { position: absolute; top: 15px; right: 15px; background: transparent; border: 1px solid #333; color: #888; padding: 5px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;}
+        
+        /* Workout Log */
+        .workout-input { width: 100%; height: 100px; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; resize: none; box-sizing: border-box; font-family: inherit; margin-bottom: 15px;}
+        .workout-input:focus { border-color: #555; }
+        .btn-full { width: 100%; }
+
+        /* Histori Ringkas */
+        .history-list { display: flex; flex-direction: column; gap: 12px;}
+        .h-item { background: #0a0a0a; padding: 16px; border-radius: 12px; border: 1px solid #222; display: flex; flex-direction: column; gap: 8px;}
+        .h-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 8px;}
+        .h-date { font-size: 13px; color: #fff; font-weight: bold;}
+        .h-protein { font-size: 13px; font-weight: bold;}
+        .h-protein.hit { color: #4ade80; }
+        .h-protein.miss { color: #f87171; }
+        .h-workout { font-size: 13px; color: #aaa; line-height: 1.5; white-space: pre-wrap;}
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <h2 class="title-header">Ais Fitness</h2>
+        <div style="width:24px;"></div>
+    </div>
+
+    <div class="date-display" id="dateDisplay">Memuat tanggal...</div>
+
+    <!-- Tracker Protein -->
+    <div class="section-card">
+        <button class="btn-reset" onclick="resetProtein()">Reset</button>
+        <h3 class="section-title">Asupan Protein</h3>
+        
+        <div class="protein-stats">
+            <h1 class="protein-big" id="currentProteinDisplay">0g</h1>
+            <div class="protein-target" id="targetProteinDisplay">dari target 120g</div>
+        </div>
+
+        <div class="progress-bg">
+            <div class="progress-fill" id="proteinBar"></div>
+        </div>
+
+        <div class="flex-row">
+            <input type="number" id="addProteinInput" class="input-box" placeholder="Tambah protein (gram)">
+            <button class="btn-action" onclick="addProtein()">+ Tambah</button>
+        </div>
+        <div class="flex-row">
+            <input type="number" id="targetInput" class="input-box" placeholder="Ubah target harian...">
+            <button class="btn-action" style="background:#333; color:#fff;" onclick="setTarget()">Set Target</button>
+        </div>
+    </div>
+
+    <!-- Workout Log -->
+    <div class="section-card">
+        <h3 class="section-title">Log Workout Hari Ini</h3>
+        <textarea id="workoutInput" class="workout-input" placeholder="Cth: &#10;- Push up 4x12&#10;- Pull up 4x8&#10;- Lari 3KM"></textarea>
+        <button class="btn-action btn-full" onclick="saveWorkout()">Simpan Catatan Workout</button>
+    </div>
+
+    <!-- Histori Ringkas -->
+    <div class="section-card">
+        <h3 class="section-title">Rekap 7 Hari Terakhir</h3>
+        <div class="history-list" id="historyList">
+            <p style="text-align:center; color:#555; font-size:12px;">Memuat data...</p>
+        </div>
+    </div>
+
+    <script>
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('dateDisplay').innerText = now.toLocaleDateString('id-ID', options);
+
+        async function loadFitnessData() {
+            try {
+                const res = await fetch('/api/workout');
+                const data = await res.json();
+                
+                if(data.today) {
+                    const current = data.today.currentProtein || 0;
+                    const target = data.today.targetProtein || 120;
+                    
+                    document.getElementById('currentProteinDisplay').innerText = current + 'g';
+                    document.getElementById('targetProteinDisplay').innerText = `dari target ${target}g`;
+                    document.getElementById('workoutInput').value = data.today.workoutLog || '';
+
+                    // Hitung persentase progress bar
+                    let percentage = (current / target) * 100;
+                    if (percentage > 100) percentage = 100;
+                    const bar = document.getElementById('proteinBar');
+                    bar.style.width = percentage + '%';
+                    
+                    if (current >= target) {
+                        bar.classList.add('done');
+                    } else {
+                        bar.classList.remove('done');
+                    }
+                }
+
+                // Render Histori
+                const list = document.getElementById('historyList');
+                if(data.history && data.history.length > 0) {
+                    list.innerHTML = data.history.map(h => {
+                        const hitTarget = h.currentProtein >= h.targetProtein;
+                        return `
+                        <div class="h-item">
+                            <div class="h-header">
+                                <div class="h-date">${h.date}</div>
+                                <div class="h-protein ${hitTarget ? 'hit' : 'miss'}">${h.currentProtein}g / ${h.targetProtein}g</div>
+                            </div>
+                            <div class="h-workout">${h.workoutLog ? h.workoutLog : '<i>Tidak ada catatan workout</i>'}</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<p style="text-align:center; color:#555; font-size:12px;">Belum ada histori.</p>';
+                }
+            } catch (e) {
+                console.log('Error memuat data fitness');
+            }
+        }
+
+        async function addProtein() {
+            const val = document.getElementById('addProteinInput').value;
+            if(!val) return;
+            await postAction('addProtein', val);
+            document.getElementById('addProteinInput').value = '';
+        }
+
+        async function setTarget() {
+            const val = document.getElementById('targetInput').value;
+            if(!val) return;
+            await postAction('setTarget', val);
+            document.getElementById('targetInput').value = '';
+        }
+
+        async function saveWorkout() {
+            const val = document.getElementById('workoutInput').value;
+            await postAction('setWorkout', val);
+            alert('Catatan workout tersimpan!');
+        }
+
+        async function resetProtein() {
+            if(!confirm('Yakin mau reset protein hari ini jadi 0?')) return;
+            await postAction('resetProtein', 0);
+        }
+
+        async function postAction(action, value) {
+            try {
+                await fetch('/api/workout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, value })
+                });
+                loadFitnessData(); // Refresh UI langsung
+            } catch (e) {
+                alert('Gagal menyimpan ke server.');
+            }
+        }
+
+        loadFitnessData();
+    </script>
+</body>
+</html>
