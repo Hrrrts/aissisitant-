@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ais Ibadah</title>
+    <style>
+        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
+        .top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; }
+        .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+        .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+        
+        .date-display { text-align: center; font-size: 14px; color: #888; margin-bottom: 30px; letter-spacing: 1px; font-weight: 600;}
+        
+        .section-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 20px;}
+        .section-title { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin: 0 0 15px 0; display: flex; align-items: center; justify-content: space-between;}
+        
+        /* Grid Tombol Waktu Salat */
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        
+        .track-btn { background: #0a0a0a; border: 1px solid #333; color: #888; padding: 15px 5px; border-radius: 12px; text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
+        .track-btn svg { width: 20px; height: 20px; stroke: #555; }
+        .track-btn.active { background: #1a2e1a; border-color: #4ade80; color: #4ade80; }
+        .track-btn.active svg { stroke: #4ade80; }
+        .track-btn:active { transform: scale(0.95); }
+
+        /* Murojaah Input */
+        .input-box { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; box-sizing: border-box; resize: none; margin-bottom: 10px; font-family: inherit;}
+        .input-box:focus { border-color: #555; }
+        .btn-save { background: #fff; color: #000; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s;}
+        .btn-save:active { transform: scale(0.95); }
+
+        /* Histori Singkat */
+        .history-list { margin-top: 15px; display: flex; flex-direction: column; gap: 10px;}
+        .h-item { background: #0a0a0a; padding: 12px; border-radius: 10px; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center;}
+        .h-date { font-size: 13px; color: #fff; font-weight: bold;}
+        .h-stats { font-size: 12px; color: #aaa;}
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <h2 class="title-header">Ais Ibadah</h2>
+        <div style="width:24px;"></div>
+    </div>
+
+    <div class="date-display" id="dateDisplay">Memuat tanggal...</div>
+
+    <div class="section-card">
+        <h3 class="section-title">Salat 5 Waktu</h3>
+        <div class="grid-5">
+            <div class="track-btn" id="btn-subuh" onclick="toggleTrack('solat', 'subuh')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                SUBUH
+            </div>
+            <div class="track-btn" id="btn-dzuhur" onclick="toggleTrack('solat', 'dzuhur')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                DZUHUR
+            </div>
+            <div class="track-btn" id="btn-ashar" onclick="toggleTrack('solat', 'ashar')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ASHAR
+            </div>
+            <div class="track-btn" id="btn-maghrib" onclick="toggleTrack('solat', 'maghrib')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                MAGHRIB
+            </div>
+            <div class="track-btn" id="btn-isya" onclick="toggleTrack('solat', 'isya')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><circle cx="15" cy="8" r="1" fill="currentColor"/></svg>
+                ISYA
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Salat Sunnah</h3>
+        <div class="grid-4">
+            <div class="track-btn" id="btn-tahajud" onclick="toggleTrack('sunnah', 'tahajud')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                TAHAJUD
+            </div>
+            <div class="track-btn" id="btn-dhuha" onclick="toggleTrack('sunnah', 'dhuha')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                DHUHA
+            </div>
+            <div class="track-btn" id="btn-rawatib" onclick="toggleTrack('sunnah', 'rawatib')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                RAWATIB
+            </div>
+            <div class="track-btn" id="btn-witir" onclick="toggleTrack('sunnah', 'witir')">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>
+                WITIR
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Murojaah / Tilawah</h3>
+        <textarea id="murojaahInput" class="input-box" rows="2" placeholder="Cth: Surah Al-Mulk ayat 1-30"></textarea>
+        <button class="btn-save" id="btnSaveMurojaah" onclick="saveMurojaah()">Simpan Catatan</button>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Rekap 7 Hari Terakhir</h3>
+        <div class="history-list" id="historyList">
+            <p style="text-align:center; color:#555; font-size:12px;">Memuat data...</p>
+        </div>
+    </div>
+
+    <script>
+        // Tampilkan Tanggal Hari Ini
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('dateDisplay').innerText = now.toLocaleDateString('id-ID', options);
+
+        let todayData = { solat: {}, sunnah: {}, murojaah: '' };
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/ibadah');
+                const data = await res.json();
+                
+                if(data.today) {
+                    todayData = data.today;
+                    
+                    // Warnain tombol solat yg udah
+                    for (const [key, value] of Object.entries(todayData.solat || {})) {
+                        if(value) document.getElementById('btn-' + key).classList.add('active');
+                    }
+                    
+                    // Warnain tombol sunnah yg udah
+                    for (const [key, value] of Object.entries(todayData.sunnah || {})) {
+                        if(value) document.getElementById('btn-' + key).classList.add('active');
+                    }
+
+                    // Isi text murojaah
+                    if(todayData.murojaah) {
+                        document.getElementById('murojaahInput').value = todayData.murojaah;
+                    }
+                }
+
+                // Render Histori
+                const list = document.getElementById('historyList');
+                if(data.history && data.history.length > 0) {
+                    list.innerHTML = data.history.map(h => {
+                        const solatCount = Object.values(h.solat || {}).filter(Boolean).length;
+                        return `
+                        <div class="h-item">
+                            <div class="h-date">${h.date}</div>
+                            <div class="h-stats">Wajib: ${solatCount}/5 | Murojaah: ${h.murojaah ? '✓' : '-'}</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<p style="text-align:center; color:#555; font-size:12px;">Belum ada histori.</p>';
+                }
+            } catch (e) {
+                console.log('Error memuat data ibadah');
+            }
+        }
+
+        async function toggleTrack(type, key) {
+            const btn = document.getElementById('btn-' + key);
+            // Toggle state di memori sementara (kalau false jadi true, kalau true jadi false)
+            if(!todayData[type]) todayData[type] = {};
+            const isCurrentlyDone = todayData[type][key] || false;
+            const newValue = !isCurrentlyDone;
+            
+            // Langsung ubah warna tombol biar terasa responsif
+            if (newValue) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            
+            todayData[type][key] = newValue;
+
+            // Simpan ke MongoDB di background
+            try {
+                await fetch('/api/ibadah', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, key, value: newValue })
+                });
+            } catch (e) {
+                alert('Koneksi terputus, gagal menyimpan ke cloud.');
+                // Kembalikan warna kalau gagal
+                if(!newValue) btn.classList.add('active'); else btn.classList.remove('active');
+                todayData[type][key] = isCurrentlyDone;
+            }
+        }
+
+        async function saveMurojaah() {
+            const val = document.getElementById('murojaahInput').value;
+            const btn = document.getElementById('btnSaveMurojaah');
+            btn.innerText = 'Menyimpan...';
+
+            try {
+                await fetch('/api/ibadah', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'murojaah', key: 'text', value: val })
+                });
+                btn.innerText = 'Tersimpan ✓';
+                setTimeout(() => { btn.innerText = 'Simpan Catatan'; }, 2000);
+            } catch (e) {
+                alert('Gagal menyimpan catatan murojaah.');
+                btn.innerText = 'Simpan Catatan';
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
