@@ -30,16 +30,23 @@
 
         .task-card { background: #151515; border: 1px solid #2a2a2a; padding: 16px; border-radius: 12px; margin-bottom: 12px; animation: fadeIn 0.3s ease; display: flex; flex-direction: column; gap: 8px;}
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .task-text { font-size: 14px; color: #eee; line-height: 1.5; font-weight: 500;}
+        .task-text { font-size: 15px; color: #fff; line-height: 1.5; font-weight: 600;}
         
-        /* Elemen Waktu dan Progress Baru */
         .task-date { font-size: 11px; color: #777; }
         .date-done { color: #4ade80; font-weight: 600; }
-        .progress-box { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 10px; margin-top: 4px; }
+        
+        /* DESAIN BUBBLE PROGRESS BARU */
+        .log-container { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; margin-bottom: 5px;}
+        .log-bubble { background: #222; padding: 10px 12px; border-radius: 12px 12px 12px 4px; border-left: 3px solid #fbbf24; position: relative;}
+        .log-bubble.done-style { border-left-color: #4ade80; }
+        .log-text { font-size: 13px; color: #ddd; line-height: 1.4;}
+        .log-date { font-size: 10px; color: #888; margin-top: 6px; text-align: right; }
+
+        .progress-box { background: #0a0a0a; border: 1px solid #222; border-radius: 10px; padding: 10px; margin-top: 4px; }
         .progress-input { width: 100%; background: transparent; border: none; color: #ddd; font-size: 13px; outline: none; resize: none; font-family: inherit; margin-bottom: 8px; box-sizing: border-box; line-height: 1.4;}
         .t-btn-small { background: #222; border: 1px solid #333; color: #aaa; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s;}
         .t-btn-small:active { background: #444; color: #fff;}
-        .progress-text { font-size: 12px; color: #aaa; background: #0a0a0a; padding: 10px; border-radius: 8px; border: 1px solid #222; line-height: 1.5;}
+        .progress-title { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;}
 
         .task-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #222; padding-top: 12px; margin-top: 4px;}
         .move-btns { display: flex; gap: 8px; }
@@ -94,7 +101,7 @@
 
     <script>
         function formatDate(dateString) {
-            if (!dateString) return 'Waktu tidak tercatat';
+            if (!dateString) return '';
             const d = new Date(dateString);
             return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' • ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
         }
@@ -131,24 +138,45 @@
                 let moveLeft = '', moveRight = '', extraHtml = '';
                 let dateHtml = `<div class="task-date">Dibuat: ${formatDate(t.createdAt)}</div>`;
                 
+                // Susun Bubble History
+                let logHtml = '';
+                if (t.progressLog && t.progressLog.length > 0) {
+                    logHtml = '<div class="log-container">';
+                    t.progressLog.forEach(log => {
+                        // Kalau statusnya Selesai, warna garis bubblenya hijau
+                        const bubbleClass = t.status === 'done' ? 'log-bubble done-style' : 'log-bubble';
+                        logHtml += `
+                            <div class="${bubbleClass}">
+                                <div class="log-text">${log.text.replace(/\n/g, '<br/>')}</div>
+                                <div class="log-date">${formatDate(log.date)}</div>
+                            </div>
+                        `;
+                    });
+                    logHtml += '</div>';
+                }
+
                 if(t.status === 'todo') {
                     moveRight = `<button class="t-btn" onclick="moveTask('${t._id}', 'progress')">Proses ❯</button>`;
                 } else if(t.status === 'progress') {
                     moveLeft = `<button class="t-btn" onclick="moveTask('${t._id}', 'todo')">❮ Batal</button>`;
                     moveRight = `<button class="t-btn" onclick="moveTask('${t._id}', 'done')">Selesai ❯</button>`;
-                    // Form buat nyatet progres
+                    
                     extraHtml = `
+                        ${logHtml}
                         <div class="progress-box">
-                            <textarea id="note-${t._id}" class="progress-input" rows="2" placeholder="Lagi ngapain sekarang/kendala apa?">${t.progressNote || ''}</textarea>
-                            <button class="t-btn-small" onclick="saveNote(event, '${t._id}')">Simpan Catatan</button>
+                            <textarea id="note-${t._id}" class="progress-input" rows="2" placeholder="Tulis update progres..."></textarea>
+                            <button class="t-btn-small" onclick="saveNote(event, '${t._id}')">+ Simpan Progres</button>
                         </div>
                     `;
                 } else if(t.status === 'done') {
                     moveLeft = `<button class="t-btn" onclick="moveTask('${t._id}', 'progress')">❮ Ulang</button>`;
-                    // Munculin jam kelar
                     dateHtml = `<div class="task-date date-done">✓ Selesai: ${formatDate(t.completedAt || new Date())}</div>`;
-                    if(t.progressNote) {
-                        extraHtml = `<div class="progress-text"><b>Catatan Akhir:</b><br/>${t.progressNote.replace(/\n/g, '<br/>')}</div>`;
+                    
+                    if (logHtml) {
+                        extraHtml = `
+                            <div class="progress-title" style="margin-top:10px;">Riwayat Progres:</div>
+                            ${logHtml}
+                        `;
                     }
                 }
 
@@ -171,21 +199,26 @@
         }
 
         async function saveNote(event, id) {
+            const inputField = document.getElementById('note-' + id);
+            const noteText = inputField.value;
+            if(!noteText.trim()) return;
+
             const btn = event.target;
-            const noteText = document.getElementById('note-' + id).value;
             btn.innerText = 'Menyimpan...';
             
             try {
                 await fetch('/api/task', {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ id, progressNote: noteText })
+                    body: JSON.stringify({ id, newNote: noteText })
                 });
-                btn.innerText = 'Tersimpan ✓';
-                setTimeout(() => { btn.innerText = 'Simpan Catatan'; }, 2000);
+                
+                // Form langsung dibersihkan dan data direfresh biar bubble baru muncul
+                inputField.value = ''; 
+                loadTasks();
             } catch (e) {
                 alert('Gagal simpan catatan.');
-                btn.innerText = 'Simpan Catatan';
+                btn.innerText = '+ Simpan Progres';
             }
         }
 
@@ -219,7 +252,7 @@
         }
 
         async function deleteTask(id) {
-            if(!confirm('Hapus tugas ini?')) return;
+            if(!confirm('Hapus tugas ini selamanya?')) return;
             try {
                 await fetch('/api/task', {
                     method: 'DELETE',

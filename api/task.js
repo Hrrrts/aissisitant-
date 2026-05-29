@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
                 text, 
                 status: 'todo',
                 createdAt: new Date(),
-                progressNote: '',
+                progressLog: [], // Sekarang bentuknya Array (Daftar) buat nyimpen banyak bubble
                 completedAt: null
             });
             res.status(200).json({ success: true });
@@ -29,28 +29,31 @@ module.exports = async (req, res) => {
             res.status(200).json(tasks);
             
         } else if (req.method === 'PUT') {
-            const { id, newStatus, progressNote } = req.body;
-            let updateData = {};
+            const { id, newStatus, newNote } = req.body;
+            let updateQuery = {};
+            let setOps = {};
 
-            // Kalau ada update status
+            // 1. Kalau ada pindah status
             if (newStatus) {
-                updateData.status = newStatus;
+                setOps.status = newStatus;
                 if (newStatus === 'done') {
-                    updateData.completedAt = new Date(); // Catat waktu selesai
+                    setOps.completedAt = new Date();
                 } else {
-                    updateData.completedAt = null; // Reset kalau dibalikin ke proses/belum
+                    setOps.completedAt = null;
                 }
             }
+            if (Object.keys(setOps).length > 0) updateQuery.$set = setOps;
 
-            // Kalau ada update catatan progres
-            if (progressNote !== undefined) {
-                updateData.progressNote = progressNote;
+            // 2. Kalau ada tambahan catatan progres (Push ke dalam array)
+            if (newNote) {
+                updateQuery.$push = { 
+                    progressLog: { text: newNote, date: new Date() } 
+                };
             }
 
-            await collection.updateOne(
-                { _id: new ObjectId(id) },
-                { $set: updateData }
-            );
+            if (Object.keys(updateQuery).length > 0) {
+                await collection.updateOne({ _id: new ObjectId(id) }, updateQuery);
+            }
             res.status(200).json({ success: true });
 
         } else if (req.method === 'DELETE') {
