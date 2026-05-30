@@ -6,20 +6,43 @@ let playHistory = [];
 let historyIndex = -1;
 let parsedLyrics = [];
 let currentLyricIndex = -1;
-let allPlaylists = {}; // Buat nyimpen data playlist di memory biar cepet
+let allPlaylists = {}; 
 
 const playIconSvg = '▶';
 const pauseIconSvg = '⏸';
 
 document.addEventListener("DOMContentLoaded", () => {
     loadPlaylistsToHome();
+    loadSearchHistory();
 });
 
-// LOGIKA SWIPE BACK (HISTORY API)
+// LOGIKA RIWAYAT PENCARIAN (LOCALSTORAGE)
+const searchHistoryKey = 'ais_search_history';
+
+function loadSearchHistory() {
+    const history = JSON.parse(localStorage.getItem(searchHistoryKey)) || [];
+    const container = document.getElementById('searchHistory');
+    if(history.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = 'flex';
+    container.innerHTML = history.map(q => `<div class="history-pill" onclick="executeSearch('${q.replace(/'/g, "\\'")}')">🕒 ${q}</div>`).join('');
+}
+
+function saveSearchHistory(query) {
+    let history = JSON.parse(localStorage.getItem(searchHistoryKey)) || [];
+    // Hapus duplikat kalau udah ada
+    history = history.filter(q => q.toLowerCase() !== query.toLowerCase()); 
+    history.unshift(query); // Masukin di paling depan
+    if(history.length > 8) history.pop(); // Maksimal nyimpen 8 aja biar gak kepanjangan
+    localStorage.setItem(searchHistoryKey, JSON.stringify(history));
+    loadSearchHistory();
+}
+
 function openFullPlayer() {
     if(!currentVideoId) return;
     document.getElementById('fullPlayer').classList.add('open');
-    // Bikin jebakan histori biar swipe back di HP kebaca
     history.pushState({ modal: 'fullPlayer' }, ''); 
 }
 
@@ -27,15 +50,13 @@ function closeFullPlayer() {
     document.getElementById('fullPlayer').classList.remove('open');
 }
 
-// Deteksi saat user melakukan swipe back (kembali) di HP Android
 window.addEventListener('popstate', (e) => {
     const fp = document.getElementById('fullPlayer');
     if (fp.classList.contains('open')) {
-        fp.classList.remove('open'); // Tutup player tanpa nutup app
+        fp.classList.remove('open');
     }
 });
 
-// MEMUAT PLAYLIST (DENGAN GAMBAR)
 async function loadPlaylistsToHome() {
     const grid = document.getElementById('playlistGrid');
     try {
@@ -50,7 +71,6 @@ async function loadPlaylistsToHome() {
         let html = '';
         for (let name in allPlaylists) {
             const songs = allPlaylists[name];
-            // Ambil gambar dari lagu pertama di playlist tersebut
             const coverImage = songs.length > 0 ? `https://img.youtube.com/vi/${songs[0].videoId}/hqdefault.jpg` : '';
             
             html += `
@@ -64,7 +84,7 @@ async function loadPlaylistsToHome() {
             `;
         }
         grid.innerHTML = html;
-        checkIfLiked(); // Cek status love kalau lagu lagi muter
+        checkIfLiked();
     } catch (error) {
         grid.innerHTML = '<p style="color:#ff4444; font-size:13px;">Gagal memuat database.</p>';
     }
@@ -76,7 +96,6 @@ function playFromFolder(playlistName) {
     selectSong(songs[0].videoId, songs[0].title, songs[0].channel);
 }
 
-// LOGIKA YOUTUBE
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 document.head.appendChild(tag);
@@ -130,10 +149,17 @@ document.getElementById('progressBar').addEventListener('input', (e) => {
     }
 });
 
-// PENCARIAN
-document.getElementById('searchBtn').addEventListener('click', async () => {
+// EKSEKUSI PENCARIAN
+document.getElementById('searchBtn').addEventListener('click', () => {
     const query = document.getElementById('searchInput').value;
     if (!query) return;
+    executeSearch(query);
+});
+
+async function executeSearch(query) {
+    document.getElementById('searchInput').value = query; // Update input box if clicked from pill
+    saveSearchHistory(query); // Simpan ke histori
+    
     const searchResults = document.getElementById('searchResults');
     searchResults.style.display = 'block';
     searchResults.innerHTML = '<div class="result-item" style="text-align:center;">Mencari...</div>';
@@ -150,7 +176,7 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
             `).join('');
         } else { searchResults.innerHTML = '<div class="result-item">Tidak ditemukan.</div>'; }
     } catch (e) { searchResults.innerHTML = '<div class="result-item">Error jaringan.</div>'; }
-});
+}
 
 function togglePlayPause() {
     if (!currentVideoId || !player) return;
@@ -175,26 +201,40 @@ function playNextLogics() {
         const nextSong = playHistory[historyIndex];
         loadSongToPlayer(nextSong.videoId, nextSong.title, nextSong.channel);
     } else {
-        fetchSimilarVibes();
+        fetchSimilarVibes(); // Panggil algoritma cerdas
     }
 }
 
+// ALGORITMA AUTO-PLAY CERDAS (NYARI ARTIS BARU)
 async function fetchSimilarVibes() {
     const currentTitle = playHistory[historyIndex].title;
     const currentArtist = playHistory[historyIndex].channel;
-    document.getElementById('fullTitle').innerText = "Mencari otomatis...";
+    document.getElementById('fullTitle').innerText = "Mencari vibes baru...";
+    
     try {
-        const res = await fetch('/api/search?q=' + encodeURIComponent(currentTitle + " " + currentArtist + " mix audio"));
+        // Trik: Tambahin kata kunci recommended biar dapet playlist YT
+        const searchQ = currentTitle + " recommended indie music audio";
+        const res = await fetch('/api/search?q=' + encodeURIComponent(searchQ));
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 1) {
-            const filtered = data.filter(item => item.videoId !== currentVideoId);
-            const nextSong = filtered[Math.floor(Math.random() * filtered.length)] || data[0];
+        
+        if (Array.isArray(data) && data.length > 0) {
+            // FILTER: Buang semua lagu yang artisnya SAMA dengan yang lagi diputar
+            const filtered = data.filter(item => {
+                const isSameVideo = item.videoId === currentVideoId;
+                const isSameArtist = item.channel.toLowerCase().includes(currentArtist.toLowerCase());
+                return !isSameVideo && !isSameArtist;
+            });
+
+            // Kalau ada hasil artis lain, ambil acak. Kalau mentok habis, ambil random biasa.
+            const nextSong = filtered.length > 0 
+                ? filtered[Math.floor(Math.random() * filtered.length)] 
+                : data[Math.floor(Math.random() * data.length)];
+                
             selectSong(nextSong.videoId, nextSong.title, nextSong.channel);
         }
     } catch (e) {}
 }
 
-// LOGIKA LIRIK
 async function fetchLyrics(rawTitle, artist) {
     const lyricsBox = document.getElementById('lyricsContainer');
     lyricsBox.style.display = 'block';
@@ -253,26 +293,22 @@ function syncLyrics(currentTime) {
     }
 }
 
-// KONTROL UPDATE TAMPILAN
 function loadSongToPlayer(videoId, title, channel) {
     currentVideoId = videoId;
     
-    // Mini Player Update
     document.getElementById('miniPlayer').classList.add('show');
     document.getElementById('miniTitle').innerText = title;
     document.getElementById('miniArtist').innerText = channel;
     document.getElementById('miniThumb').src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
     document.getElementById('miniThumb').style.display = 'block';
 
-    // Full Player Update
     document.getElementById('fullTitle').innerText = title;
     document.getElementById('fullArtist').innerText = channel;
     document.getElementById('fullThumb').src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     document.getElementById('fullThumb').style.display = 'block';
     
     document.getElementById('prevBtn').disabled = historyIndex <= 0;
-    
-    checkIfLiked(); // Update icon hati
+    checkIfLiked();
 
     if (player && player.loadVideoById) player.loadVideoById(videoId);
     fetchLyrics(title, channel);
@@ -286,7 +322,6 @@ function selectSong(videoId, title, channel) {
     loadSongToPlayer(videoId, title, channel);
 }
 
-// LOGIKA TOMBOL LOVE & PLAYLIST
 function checkIfLiked() {
     if (!currentVideoId) return;
     const likedSongs = allPlaylists["Lagu Disukai"] || [];
@@ -294,10 +329,10 @@ function checkIfLiked() {
     
     const likeBtn = document.getElementById('likeBtn');
     if (isLiked) {
-        likeBtn.innerText = '♥'; // Hati isi
+        likeBtn.innerText = '♥';
         likeBtn.style.color = '#1db954';
     } else {
-        likeBtn.innerText = '♡'; // Hati kosong
+        likeBtn.innerText = '♡';
         likeBtn.style.color = '#fff';
     }
 }
@@ -316,14 +351,11 @@ async function toggleLike() {
     };
 
     try {
-        // Tembak API buat tambah/hapus
         await fetch('/api/playlist', {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bodyData)
         });
-        
-        // Refresh daftar playlist biar sinkron
         await loadPlaylistsToHome(); 
     } catch (e) {
         alert("Gagal sinkron sama database");
@@ -348,7 +380,7 @@ async function addToPlaylist() {
         });
         const data = await response.json();
         if (data.success) {
-            loadPlaylistsToHome(); // Refresh otomatis
+            loadPlaylistsToHome(); 
         } else { alert(data.error); }
     } catch (error) { alert("Error database."); }
 }
