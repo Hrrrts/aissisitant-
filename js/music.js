@@ -16,12 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSearchHistory();
 });
 
-// LOGIKA RIWAYAT PENCARIAN (LOCALSTORAGE)
+// LOGIKA RIWAYAT PENCARIAN
 const searchHistoryKey = 'ais_search_history';
 
 function loadSearchHistory() {
     const history = JSON.parse(localStorage.getItem(searchHistoryKey)) || [];
     const container = document.getElementById('searchHistory');
+    if(!container) return;
     if(history.length === 0) {
         container.style.display = 'none';
         return;
@@ -32,10 +33,9 @@ function loadSearchHistory() {
 
 function saveSearchHistory(query) {
     let history = JSON.parse(localStorage.getItem(searchHistoryKey)) || [];
-    // Hapus duplikat kalau udah ada
     history = history.filter(q => q.toLowerCase() !== query.toLowerCase()); 
-    history.unshift(query); // Masukin di paling depan
-    if(history.length > 8) history.pop(); // Maksimal nyimpen 8 aja biar gak kepanjangan
+    history.unshift(query);
+    if(history.length > 8) history.pop();
     localStorage.setItem(searchHistoryKey, JSON.stringify(history));
     loadSearchHistory();
 }
@@ -52,7 +52,7 @@ function closeFullPlayer() {
 
 window.addEventListener('popstate', (e) => {
     const fp = document.getElementById('fullPlayer');
-    if (fp.classList.contains('open')) {
+    if (fp && fp.classList.contains('open')) {
         fp.classList.remove('open');
     }
 });
@@ -64,7 +64,7 @@ async function loadPlaylistsToHome() {
         allPlaylists = await response.json();
         
         if (Object.keys(allPlaylists).length === 0) {
-            grid.innerHTML = '<p style="color:#888; font-size:13px; grid-column: span 2;">Belum ada playlist.</p>';
+            if(grid) grid.innerHTML = '<p style="color:#888; font-size:13px; grid-column: span 2;">Belum ada playlist.</p>';
             return;
         }
 
@@ -83,10 +83,10 @@ async function loadPlaylistsToHome() {
                 </div>
             `;
         }
-        grid.innerHTML = html;
+        if(grid) grid.innerHTML = html;
         checkIfLiked();
     } catch (error) {
-        grid.innerHTML = '<p style="color:#ff4444; font-size:13px;">Gagal memuat database.</p>';
+        if(grid) grid.innerHTML = '<p style="color:#ff4444; font-size:13px;">Gagal memuat database.</p>';
     }
 }
 
@@ -116,8 +116,10 @@ function formatTime(seconds) {
 }
 
 function updatePlayPauseIcons(playing) {
-    document.getElementById('playBtn').innerHTML = playing ? pauseIconSvg : playIconSvg;
-    document.getElementById('miniPlayBtn').innerHTML = playing ? pauseIconSvg : playIconSvg;
+    const pb = document.getElementById('playBtn');
+    const mpb = document.getElementById('miniPlayBtn');
+    if(pb) pb.innerHTML = playing ? pauseIconSvg : playIconSvg;
+    if(mpb) mpb.innerHTML = playing ? pauseIconSvg : playIconSvg;
 }
 
 function onPlayerStateChange(event) {
@@ -126,12 +128,14 @@ function onPlayerStateChange(event) {
     if (event.data == YT.PlayerState.PLAYING) {
         isPlaying = true;
         updatePlayPauseIcons(true);
-        progressBar.max = player.getDuration();
-        document.getElementById('durationTime').innerText = formatTime(player.getDuration());
+        if(progressBar) progressBar.max = player.getDuration();
+        const dur = document.getElementById('durationTime');
+        if(dur) dur.innerText = formatTime(player.getDuration());
         progressInterval = setInterval(() => {
             const current = player.getCurrentTime();
-            progressBar.value = current;
-            document.getElementById('currentTime').innerText = formatTime(current);
+            if(progressBar) progressBar.value = current;
+            const curT = document.getElementById('currentTime');
+            if(curT) curT.innerText = formatTime(current);
             syncLyrics(current);
         }, 500);
     } else {
@@ -141,26 +145,47 @@ function onPlayerStateChange(event) {
     }
 }
 
-document.getElementById('progressBar').addEventListener('input', (e) => {
-    if(player && player.seekTo) {
-        player.seekTo(e.target.value, true);
-        document.getElementById('currentTime').innerText = formatTime(e.target.value);
-        syncLyrics(e.target.value);
-    }
-});
+const pbInput = document.getElementById('progressBar');
+if(pbInput) {
+    pbInput.addEventListener('input', (e) => {
+        if(player && player.seekTo) {
+            player.seekTo(e.target.value, true);
+            const curT = document.getElementById('currentTime');
+            if(curT) curT.innerText = formatTime(e.target.value);
+            syncLyrics(e.target.value);
+        }
+    });
+}
 
-// EKSEKUSI PENCARIAN
-document.getElementById('searchBtn').addEventListener('click', () => {
-    const query = document.getElementById('searchInput').value;
-    if (!query) return;
-    executeSearch(query);
-});
+// BISA PENCET TOMBOL ENTER UNTUK NYARI
+const searchBtn = document.getElementById('searchBtn');
+const searchInput = document.getElementById('searchInput');
+
+if(searchBtn) {
+    searchBtn.addEventListener('click', () => {
+        const query = searchInput.value;
+        if (!query) return;
+        executeSearch(query);
+    });
+}
+
+if(searchInput) {
+    searchInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+            const query = e.target.value;
+            if(query) executeSearch(query);
+            searchInput.blur(); // Nutup keyboard HP otomatis
+        }
+    });
+}
 
 async function executeSearch(query) {
-    document.getElementById('searchInput').value = query; // Update input box if clicked from pill
-    saveSearchHistory(query); // Simpan ke histori
+    const sInput = document.getElementById('searchInput');
+    if(sInput) sInput.value = query; 
+    saveSearchHistory(query); 
     
     const searchResults = document.getElementById('searchResults');
+    if(!searchResults) return;
     searchResults.style.display = 'block';
     searchResults.innerHTML = '<div class="result-item" style="text-align:center;">Mencari...</div>';
     
@@ -183,16 +208,24 @@ function togglePlayPause() {
     if (isPlaying) player.pauseVideo();
     else player.playVideo();
 }
-document.getElementById('playBtn').addEventListener('click', togglePlayPause);
-document.getElementById('miniPlayBtn').addEventListener('click', togglePlayPause);
-document.getElementById('nextBtn').addEventListener('click', playNextLogics);
-document.getElementById('prevBtn').addEventListener('click', () => {
-    if (historyIndex > 0) {
-        historyIndex--;
-        const prevSong = playHistory[historyIndex];
-        loadSongToPlayer(prevSong.videoId, prevSong.title, prevSong.channel);
-    }
-});
+
+const pb = document.getElementById('playBtn');
+const mpb = document.getElementById('miniPlayBtn');
+const nb = document.getElementById('nextBtn');
+const prb = document.getElementById('prevBtn');
+
+if(pb) pb.addEventListener('click', togglePlayPause);
+if(mpb) mpb.addEventListener('click', togglePlayPause);
+if(nb) nb.addEventListener('click', playNextLogics);
+if(prb) {
+    prb.addEventListener('click', () => {
+        if (historyIndex > 0) {
+            historyIndex--;
+            const prevSong = playHistory[historyIndex];
+            loadSongToPlayer(prevSong.videoId, prevSong.title, prevSong.channel);
+        }
+    });
+}
 
 function playNextLogics() {
     if (!currentVideoId) return;
@@ -201,31 +234,29 @@ function playNextLogics() {
         const nextSong = playHistory[historyIndex];
         loadSongToPlayer(nextSong.videoId, nextSong.title, nextSong.channel);
     } else {
-        fetchSimilarVibes(); // Panggil algoritma cerdas
+        fetchSimilarVibes();
     }
 }
 
-// ALGORITMA AUTO-PLAY CERDAS (NYARI ARTIS BARU)
+// ALGORITMA VIBES BARU: MENGHINDARI COVER DAN LIVE
 async function fetchSimilarVibes() {
     const currentTitle = playHistory[historyIndex].title;
     const currentArtist = playHistory[historyIndex].channel;
-    document.getElementById('fullTitle').innerText = "Mencari vibes baru...";
+    const ft = document.getElementById('fullTitle');
+    if(ft) ft.innerText = "Mencari vibes baru...";
     
     try {
-        // Trik: Tambahin kata kunci recommended biar dapet playlist YT
-        const searchQ = currentTitle + " recommended indie music audio";
+        const searchQ = currentTitle + " " + currentArtist + " recommended official audio -cover -live -karaoke";
         const res = await fetch('/api/search?q=' + encodeURIComponent(searchQ));
         const data = await res.json();
         
         if (Array.isArray(data) && data.length > 0) {
-            // FILTER: Buang semua lagu yang artisnya SAMA dengan yang lagi diputar
             const filtered = data.filter(item => {
                 const isSameVideo = item.videoId === currentVideoId;
                 const isSameArtist = item.channel.toLowerCase().includes(currentArtist.toLowerCase());
                 return !isSameVideo && !isSameArtist;
             });
 
-            // Kalau ada hasil artis lain, ambil acak. Kalau mentok habis, ambil random biasa.
             const nextSong = filtered.length > 0 
                 ? filtered[Math.floor(Math.random() * filtered.length)] 
                 : data[Math.floor(Math.random() * data.length)];
@@ -237,6 +268,7 @@ async function fetchSimilarVibes() {
 
 async function fetchLyrics(rawTitle, artist) {
     const lyricsBox = document.getElementById('lyricsContainer');
+    if(!lyricsBox) return;
     lyricsBox.style.display = 'block';
     lyricsBox.innerHTML = '<div style="margin-top:20%;"><i style="color:#777;">Mencari lirik...</i></div>';
     parsedLyrics = []; currentLyricIndex = -1;
@@ -269,7 +301,8 @@ function parseSyncedLyrics(lrc) {
         }
     });
     html += '<div style="height: 150px;"></div>';
-    document.getElementById('lyricsContainer').innerHTML = html;
+    const container = document.getElementById('lyricsContainer');
+    if(container) container.innerHTML = html;
 }
 
 function syncLyrics(currentTime) {
@@ -288,7 +321,8 @@ function syncLyrics(currentTime) {
         const newEl = document.getElementById(parsedLyrics[activeIndex].id);
         if (newEl) {
             newEl.classList.add('lyric-active');
-            document.getElementById('lyricsContainer').scrollTo({ top: newEl.offsetTop - 150, behavior: 'smooth' });
+            const container = document.getElementById('lyricsContainer');
+            if(container) container.scrollTo({ top: newEl.offsetTop - 150, behavior: 'smooth' });
         }
     }
 }
@@ -296,18 +330,25 @@ function syncLyrics(currentTime) {
 function loadSongToPlayer(videoId, title, channel) {
     currentVideoId = videoId;
     
-    document.getElementById('miniPlayer').classList.add('show');
-    document.getElementById('miniTitle').innerText = title;
-    document.getElementById('miniArtist').innerText = channel;
-    document.getElementById('miniThumb').src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
-    document.getElementById('miniThumb').style.display = 'block';
+    const mp = document.getElementById('miniPlayer');
+    if(mp) mp.classList.add('show');
+    const mt = document.getElementById('miniTitle');
+    if(mt) mt.innerText = title;
+    const ma = document.getElementById('miniArtist');
+    if(ma) ma.innerText = channel;
+    const mTh = document.getElementById('miniThumb');
+    if(mTh) { mTh.src = `https://img.youtube.com/vi/${videoId}/default.jpg`; mTh.style.display = 'block'; }
 
-    document.getElementById('fullTitle').innerText = title;
-    document.getElementById('fullArtist').innerText = channel;
-    document.getElementById('fullThumb').src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    document.getElementById('fullThumb').style.display = 'block';
+    const ft = document.getElementById('fullTitle');
+    if(ft) ft.innerText = title;
+    const fa = document.getElementById('fullArtist');
+    if(fa) fa.innerText = channel;
+    const fTh = document.getElementById('fullThumb');
+    if(fTh) { fTh.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; fTh.style.display = 'block'; }
     
-    document.getElementById('prevBtn').disabled = historyIndex <= 0;
+    const prb = document.getElementById('prevBtn');
+    if(prb) prb.disabled = historyIndex <= 0;
+    
     checkIfLiked();
 
     if (player && player.loadVideoById) player.loadVideoById(videoId);
@@ -315,7 +356,8 @@ function loadSongToPlayer(videoId, title, channel) {
 }
 
 function selectSong(videoId, title, channel) {
-    document.getElementById('searchResults').style.display = 'none';
+    const sr = document.getElementById('searchResults');
+    if(sr) sr.style.display = 'none';
     if (historyIndex < playHistory.length - 1) playHistory = playHistory.slice(0, historyIndex + 1);
     playHistory.push({videoId, title, channel});
     historyIndex++;
@@ -328,6 +370,7 @@ function checkIfLiked() {
     const isLiked = likedSongs.find(s => s.videoId === currentVideoId);
     
     const likeBtn = document.getElementById('likeBtn');
+    if(!likeBtn) return;
     if (isLiked) {
         likeBtn.innerText = '♥';
         likeBtn.style.color = '#1db954';
@@ -343,11 +386,14 @@ async function toggleLike() {
     const isLiked = likedSongs.find(s => s.videoId === currentVideoId);
     
     const method = isLiked ? 'DELETE' : 'POST';
+    const ft = document.getElementById('fullTitle');
+    const fa = document.getElementById('fullArtist');
+    
     const bodyData = {
         playlistName: "Lagu Disukai",
         videoId: currentVideoId,
-        title: document.getElementById('fullTitle').innerText,
-        channel: document.getElementById('fullArtist').innerText
+        title: ft ? ft.innerText : '',
+        channel: fa ? fa.innerText : ''
     };
 
     try {
@@ -362,39 +408,15 @@ async function toggleLike() {
     }
 }
 
-async function addToPlaylist() {
-    if (!currentVideoId) return;
-    const playlistName = prompt("Simpan ke playlist mana?", "Favorit");
-    if (!playlistName) return;
-
-    try {
-        const response = await fetch('/api/playlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                playlistName: playlistName,
-                videoId: currentVideoId,
-                title: document.getElementById('fullTitle').innerText,
-                channel: document.getElementById('fullArtist').innerText
-            })
-        });
-        const data = await response.json();
-        if (data.success) {
-            loadPlaylistsToHome(); 
-        } else { alert(data.error); }
-    } catch (error) { alert("Error database."); }
-}
-
-// === LOGIKA JENDELA MODAL PLAYLIST ===
 function addToPlaylist() {
     if (!currentVideoId) return;
     const modal = document.getElementById('saveModal');
     const listContainer = document.getElementById('savePlaylistList');
+    if(!modal || !listContainer) return;
     
-    // Tampilkan daftar playlist yang ada sebagai tombol
     listContainer.innerHTML = '';
     for (let name in allPlaylists) {
-        if (name === "Lagu Disukai") continue; // Abaikan folder Love
+        if (name === "Lagu Disukai") continue; 
         listContainer.innerHTML += `
             <button onclick="saveToExisting('${name.replace(/'/g, "\\'")}')" style="background:#27272a; color:#fff; border:none; padding:12px; border-radius:10px; text-align:left; font-family:inherit; font-weight:600; cursor:pointer;">
                 + ${name}
@@ -406,23 +428,30 @@ function addToPlaylist() {
         listContainer.innerHTML = '<div style="color:#555; font-size:13px;">Belum ada playlist selain Lagu Disukai.</div>';
     }
     
-    document.getElementById('newPlaylistInput').value = '';
+    const newPl = document.getElementById('newPlaylistInput');
+    if(newPl) newPl.value = '';
     modal.style.display = 'flex';
 }
 
 async function saveToExisting(playlistName) {
-    document.getElementById('saveModal').style.display = 'none';
+    const modal = document.getElementById('saveModal');
+    if(modal) modal.style.display = 'none';
     await executeSaveToDB(playlistName);
 }
 
 async function saveToNewPlaylist() {
-    const input = document.getElementById('newPlaylistInput').value;
-    if (!input.trim()) return alert("Nama playlist nggak boleh kosong!");
-    document.getElementById('saveModal').style.display = 'none';
-    await executeSaveToDB(input.trim());
+    const input = document.getElementById('newPlaylistInput');
+    if(!input) return;
+    const val = input.value;
+    if (!val.trim()) return alert("Nama playlist nggak boleh kosong!");
+    const modal = document.getElementById('saveModal');
+    if(modal) modal.style.display = 'none';
+    await executeSaveToDB(val.trim());
 }
 
 async function executeSaveToDB(playlistName) {
+    const ft = document.getElementById('fullTitle');
+    const fa = document.getElementById('fullArtist');
     try {
         const response = await fetch('/api/playlist', {
             method: 'POST',
@@ -430,17 +459,16 @@ async function executeSaveToDB(playlistName) {
             body: JSON.stringify({
                 playlistName: playlistName,
                 videoId: currentVideoId,
-                title: document.getElementById('fullTitle').innerText,
-                channel: document.getElementById('fullArtist').innerText
+                title: ft ? ft.innerText : '',
+                channel: fa ? fa.innerText : ''
             })
         });
         const data = await response.json();
         if (data.success) {
             alert(`Lagu ditambahkan ke ${playlistName}!`);
-            loadPlaylistsToHome(); // Refresh otomatis
+            loadPlaylistsToHome(); 
         } else { alert(data.error); }
     } catch (error) { alert("Error database."); }
 }
 
-// Override fungsi lama yang pakai prompt
 window.addToPlaylist = addToPlaylist;

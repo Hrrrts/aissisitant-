@@ -68,7 +68,7 @@
 
     <div class="input-section" id="inputSection">
         <h3 id="formTitle" style="margin-top:0; margin-bottom:15px; font-size:16px;">Tambah Catatan</h3>
-        <input type="number" id="txAmount" class="input-box" placeholder="Nominal (Cth: 50000)">
+        <input type="text" id="txAmount" class="input-box" inputmode="numeric" placeholder="Nominal (Cth: 50.000)">
         <input type="text" id="txDesc" class="input-box" placeholder="Keterangan (Cth: Jual Kurma)">
         <input type="hidden" id="txType">
         <button class="btn-submit" onclick="submitTransaction()">Simpan ke Database</button>
@@ -137,7 +137,7 @@
         }
 
         async function submitTransaction() {
-            const amount = document.getElementById('txAmount').value;
+            const amount = document.getElementById('txAmount').value.replace(/./g, '');
             const desc = document.getElementById('txDesc').value;
             const type = document.getElementById('txType').value;
 
@@ -160,6 +160,19 @@
                     document.getElementById('inputSection').style.display = 'none';
                     btn.innerText = 'Simpan ke Database';
                     loadWallet(); // Refresh UI
+
+        // Logika Format Titik Ribuan
+        const amountInput = document.getElementById('txAmount');
+        if (amountInput) {
+            amountInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                } else {
+                    this.value = '';
+                }
+            });
+        }
                 }
             } catch (error) {
                 alert("Gagal menyimpan ke server!");
@@ -169,6 +182,19 @@
 
         // Jalankan saat halaman dibuka
         loadWallet();
+
+        // Logika Format Titik Ribuan
+        const amountInput = document.getElementById('txAmount');
+        if (amountInput) {
+            amountInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                } else {
+                    this.value = '';
+                }
+            });
+        }
     </script>
 </body>
 </html>
