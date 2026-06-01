@@ -1,84 +1,58 @@
 const API_URL = '/api/playlist';
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadPlaylistsFromDB();
-});
+document.addEventListener("DOMContentLoaded", () => { loadPlaylistsFromDB(); });
 
 async function loadPlaylistsFromDB() {
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
-        
         if (data && !data.error) {
             allPlaylists = data;
             if (!allPlaylists["Lagu Favorit"]) allPlaylists["Lagu Favorit"] = [];
-        } else {
-            allPlaylists = { "Lagu Favorit": [] };
-        }
-        renderPlaylistGrid();
-        checkIfLiked();
-    } catch (error) {
-        console.error("Gagal memuat playlist:", error);
-        allPlaylists = { "Lagu Favorit": [] };
-    }
+        } else { allPlaylists = { "Lagu Favorit": [] }; }
+        renderPlaylistGrid(); checkIfLiked();
+    } catch (error) { allPlaylists = { "Lagu Favorit": [] }; }
 }
 
-// ==========================================
-// FITUR LIKED SONGS (TOMBOL LOVE)
-// ==========================================
+// === FITUR LOVE ===
 function checkIfLiked() {
     if (!currentVideoId) return;
-    const likeBtn = document.getElementById('likeBtn');
-    if (!likeBtn) return;
-
+    const likeBtn = document.getElementById('likeBtn'); if (!likeBtn) return;
     const favList = allPlaylists["Lagu Favorit"] || [];
     const isLiked = favList.some(song => song.videoId === currentVideoId);
-
-    if (isLiked) {
-        likeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
-    } else {
-        likeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
-    }
+    likeBtn.innerHTML = isLiked 
+        ? '<svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
 }
 
 async function toggleLike() {
     if (!currentVideoId || historyIndex < 0) return;
     const currentSong = playHistory[historyIndex];
     if (!allPlaylists["Lagu Favorit"]) allPlaylists["Lagu Favorit"] = [];
-    
     const favList = allPlaylists["Lagu Favorit"];
     const songIndex = favList.findIndex(song => song.videoId === currentVideoId);
     const isAdding = songIndex === -1;
 
-    // Optimistic UI Update
-    if (isAdding) favList.push(currentSong);
-    else favList.splice(songIndex, 1);
-    
-    checkIfLiked();
-    renderPlaylistGrid();
+    if (isAdding) favList.push(currentSong); else favList.splice(songIndex, 1);
+    checkIfLiked(); renderPlaylistGrid();
 
-    // API Call
     try {
-        const method = isAdding ? 'POST' : 'DELETE';
         await fetch(API_URL, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                playlistName: "Lagu Favorit", 
-                videoId: currentSong.videoId, 
-                title: currentSong.title, 
-                channel: currentSong.channel 
-            })
+            method: isAdding ? 'POST' : 'DELETE', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playlistName: "Lagu Favorit", videoId: currentSong.videoId, title: currentSong.title, channel: currentSong.channel })
         });
     } catch (e) { console.error(e); }
 }
 
-// ==========================================
-// FITUR MODAL TAMBAH KE PLAYLIST LAIN
-// ==========================================
+// === FITUR MODAL TAMBAH PLAYLIST ===
 function addToPlaylist() {
     if (!currentVideoId || historyIndex < 0) return;
     const saveModal = document.getElementById('saveModal');
+    
+    // Reset tampilan modal jika sebelumnya dipakai untuk fitur "Pindah"
+    saveModal.querySelector('h3').innerText = 'Pilih Playlist';
+    document.getElementById('newPlaylistInput').style.display = 'block';
+
     const savePlaylistList = document.getElementById('savePlaylistList');
     savePlaylistList.innerHTML = '';
 
@@ -86,18 +60,14 @@ function addToPlaylist() {
         if (playlistName === "Lagu Favorit") continue;
         const isAlreadyIn = allPlaylists[playlistName].some(song => song.videoId === currentVideoId);
         savePlaylistList.innerHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#09090b; padding:10px 14px; border-radius:10px; border:1px solid #27272a;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#09090b; padding:10px 14px; border-radius:10px; border:1px solid #27272a; margin-bottom:8px;">
                 <span style="color:#fff; font-size:14px;">${playlistName}</span>
                 <button onclick="addSongToExistingPlaylist('${playlistName}')" style="background:${isAlreadyIn ? '#3f3f46' : '#fbbf24'}; color:${isAlreadyIn ? '#a1a1aa' : '#000'}; border:none; padding:6px 12px; border-radius:8px; font-weight:bold; cursor:pointer;" ${isAlreadyIn ? 'disabled' : ''}>
                     ${isAlreadyIn ? 'Ditambahkan' : 'Tambah'}
                 </button>
-            </div>
-        `;
+            </div>`;
     }
-
-    if(Object.keys(allPlaylists).length <= 1) {
-        savePlaylistList.innerHTML = '<div style="color:#777; font-size:13px; text-align:center; padding:10px;">Belum ada custom playlist.</div>';
-    }
+    if(Object.keys(allPlaylists).length <= 1) savePlaylistList.innerHTML = '<div style="color:#777; font-size:13px; text-align:center; padding:10px;">Belum ada custom playlist.</div>';
     saveModal.style.display = 'flex';
 }
 
@@ -105,12 +75,9 @@ async function addSongToExistingPlaylist(playlistName) {
     const currentSong = playHistory[historyIndex];
     if (!allPlaylists[playlistName].some(song => song.videoId === currentSong.videoId)) {
         allPlaylists[playlistName].push(currentSong);
-        renderPlaylistGrid();
-        addToPlaylist(); 
-        
+        renderPlaylistGrid(); addToPlaylist(); 
         await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ playlistName, videoId: currentSong.videoId, title: currentSong.title, channel: currentSong.channel })
         });
     }
@@ -124,31 +91,22 @@ async function saveToNewPlaylist() {
 
     const currentSong = playHistory[historyIndex];
     allPlaylists[newName] = [currentSong];
-    renderPlaylistGrid();
-    inputEle.value = '';
+    renderPlaylistGrid(); inputEle.value = '';
     document.getElementById('saveModal').style.display = 'none';
 
     await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ playlistName: newName, videoId: currentSong.videoId, title: currentSong.title, channel: currentSong.channel })
     });
 }
 
-// ==========================================
-// RENDER TAMPILAN & MANAJEMEN PLAYLIST
-// ==========================================
+// === TAMPILAN GRID HOME ===
 function renderPlaylistGrid() {
-    const grid = document.getElementById('playlistGrid');
-    if (!grid) return;
+    const grid = document.getElementById('playlistGrid'); if (!grid) return;
     grid.innerHTML = '';
-    
     for (const [name, songs] of Object.entries(allPlaylists)) {
         const coverImg = songs.length > 0 ? `https://img.youtube.com/vi/${songs[0].videoId}/mqdefault.jpg` : ''; 
-        const coverHTML = coverImg 
-            ? `<img src="${coverImg}" style="width:100%; height:100%; object-fit:cover;">`
-            : `<div style="width:100%; height:100%; background:#27272a; display:flex; align-items:center; justify-content:center; font-size:24px;">🎵</div>`;
-
+        const coverHTML = coverImg ? `<img src="${coverImg}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="width:100%; height:100%; background:#27272a; display:flex; align-items:center; justify-content:center; font-size:24px;">🎵</div>`;
         grid.innerHTML += `
             <div class="playlist-card" onclick="openPlaylistManager('${name}')" style="background:#18181b; border-radius:12px; overflow:hidden; cursor:pointer; border:1px solid #27272a;">
                 <div style="width:100%; aspect-ratio:1/1;">${coverHTML}</div>
@@ -156,32 +114,56 @@ function renderPlaylistGrid() {
                     <div style="color:#fff; font-size:14px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</div>
                     <div style="color:#777; font-size:12px; margin-top:4px;">${songs.length} Lagu</div>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
 }
 
+// === FITUR MANAJEMEN PLAYLIST ===
 function openPlaylistManager(playlistName) {
     currentManagingPlaylist = playlistName;
     const pm = document.getElementById('playlistManagerModal');
-    document.getElementById('pmTitle').innerText = playlistName;
+    const pmTitle = document.getElementById('pmTitle');
+    
+    // Tombol Edit & Hapus khusus buat custom playlist
+    let editBtns = '';
+    if (playlistName !== "Lagu Favorit") {
+        editBtns = `
+            <div style="display:flex; gap:10px;">
+                <button onclick="renamePlaylist('${playlistName}')" style="background:none; border:none; font-size:18px; cursor:pointer;" title="Ganti Nama">✏️</button>
+                <button onclick="deleteEntirePlaylist('${playlistName}')" style="background:none; border:none; font-size:18px; cursor:pointer;" title="Hapus Playlist">🗑️</button>
+            </div>`;
+    }
+
+    pmTitle.innerHTML = `<div style="display:flex; align-items:center; gap:10px;">${playlistName} ${editBtns}</div>`;
+    
     const pmSongList = document.getElementById('pmSongList');
     pmSongList.innerHTML = '';
-
     const songs = allPlaylists[playlistName] || [];
+
     if (songs.length === 0) {
         pmSongList.innerHTML = '<div style="color:#777; text-align:center; margin-top:20px;">Playlist ini masih kosong.</div>';
     } else {
+        // Tombol Putar Semua & Acak
+        pmSongList.innerHTML += `
+            <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                <button onclick="playEntirePlaylist('${playlistName}', false)" style="flex:1; padding:10px; background:#fbbf24; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">▶ Putar Semua</button>
+                <button onclick="playEntirePlaylist('${playlistName}', true)" style="flex:1; padding:10px; background:#27272a; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">🔀 Acak</button>
+            </div>`;
+
         songs.forEach((song) => {
+            const safeTitle = encodeURIComponent(song.title);
+            const safeChannel = encodeURIComponent(song.channel);
             pmSongList.innerHTML += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#09090b; padding:12px; border-radius:12px;">
-                    <div style="flex:1; overflow:hidden; cursor:pointer;" onclick="playSongFromPlaylist('${song.videoId}', '${song.title.replace(/'/g, "\\'")}', '${song.channel.replace(/'/g, "\\'")}')">
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#09090b; padding:12px; border-radius:12px; margin-bottom:8px;">
+                    <div style="flex:1; overflow:hidden; cursor:pointer;" onclick="playSongFromPlaylist('${song.videoId}', '${safeTitle}', '${safeChannel}')">
                         <div style="color:#fff; font-size:14px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${song.title}</div>
                         <div style="color:#777; font-size:12px; margin-top:4px;">${song.channel}</div>
                     </div>
-                    <button onclick="removeSongFromPlaylist('${playlistName}', '${song.videoId}')" style="background:none; border:none; color:#ef4444; font-size:18px; cursor:pointer; padding-left:10px;">🗑️</button>
-                </div>
-            `;
+                    <div style="display:flex; gap:8px;">
+                        ${playlistName !== "Lagu Favorit" ? `<button onclick="promptMoveSong('${playlistName}', '${song.videoId}', '${safeTitle}', '${safeChannel}')" style="background:none; border:none; font-size:16px; cursor:pointer;" title="Pindah Playlist">➡️</button>` : ''}
+                        <button onclick="removeSongFromPlaylist('${playlistName}', '${song.videoId}')" style="background:none; border:none; color:#ef4444; font-size:18px; cursor:pointer;" title="Hapus Lagu">🗑️</button>
+                    </div>
+                </div>`;
         });
     }
     pm.style.display = 'flex';
@@ -193,22 +175,117 @@ function closePlaylistManager() {
     if (pm) pm.style.display = 'none';
 }
 
+// LOGIKA BARU: PLAY, RENAME, & DELETE PLAYLIST
+function playEntirePlaylist(playlistName, shuffle = false) {
+    let songs = [...allPlaylists[playlistName]];
+    if (songs.length === 0) return;
+    
+    if (shuffle) {
+        for (let i = songs.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [songs[i], songs[j]] = [songs[j], songs[i]];
+        }
+    }
+
+    playHistory = songs;
+    historyIndex = 0;
+    const firstSong = playHistory[0];
+    
+    const sr = document.getElementById('searchResults');
+    if(sr) sr.style.display = 'none';
+    
+    loadSongToPlayer(firstSong.videoId, firstSong.title, firstSong.channel);
+    closePlaylistManager();
+}
+
+async function renamePlaylist(oldName) {
+    const newName = prompt("Masukkan nama baru untuk playlist:", oldName);
+    if (!newName || newName === oldName) return;
+    if (allPlaylists[newName]) return alert("Nama playlist sudah dipakai!");
+
+    allPlaylists[newName] = allPlaylists[oldName];
+    delete allPlaylists[oldName];
+    renderPlaylistGrid(); closePlaylistManager();
+
+    await fetch(API_URL, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldName, newName })
+    });
+}
+
+async function deleteEntirePlaylist(playlistName) {
+    if(confirm(`Yakin ingin menghapus seluruh playlist "${playlistName}"?`)) {
+        delete allPlaylists[playlistName];
+        renderPlaylistGrid(); closePlaylistManager();
+        await fetch(API_URL, {
+            method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playlistName }) // Gak ngirim videoId = hapus semua
+        });
+    }
+}
+
+function playSongFromPlaylist(videoId, safeTitle, safeChannel) {
+    closePlaylistManager();
+    const title = decodeURIComponent(safeTitle); const channel = decodeURIComponent(safeChannel);
+    if(typeof selectSong === 'function') selectSong(videoId, title, channel, false);
+}
+
 async function removeSongFromPlaylist(playlistName, videoId) {
     if(confirm("Hapus lagu ini dari playlist?")) {
         allPlaylists[playlistName] = allPlaylists[playlistName].filter(song => song.videoId !== videoId);
-        renderPlaylistGrid();
-        openPlaylistManager(playlistName); 
-        checkIfLiked(); 
-        
+        renderPlaylistGrid(); openPlaylistManager(playlistName); checkIfLiked(); 
         await fetch(API_URL, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'DELETE', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ playlistName, videoId })
         });
     }
 }
 
-function playSongFromPlaylist(videoId, title, channel) {
-    closePlaylistManager();
-    if(typeof selectSong === 'function') selectSong(videoId, title, channel);
+// LOGIKA BARU: PINDAH LAGU (MOVE)
+let moveData = null;
+function promptMoveSong(playlistName, videoId, safeTitle, safeChannel) {
+    moveData = { source: playlistName, song: { videoId, title: decodeURIComponent(safeTitle), channel: decodeURIComponent(safeChannel) } };
+    
+    // Kita "bajak" modal tambah playlist buat jadi modal pindah
+    const saveModal = document.getElementById('saveModal');
+    saveModal.querySelector('h3').innerText = 'Pindah ke Playlist';
+    
+    const savePlaylistList = document.getElementById('savePlaylistList');
+    savePlaylistList.innerHTML = '';
+
+    for (const pName in allPlaylists) {
+        if (pName === playlistName || pName === "Lagu Favorit") continue;
+        savePlaylistList.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#09090b; padding:10px 14px; border-radius:10px; border:1px solid #27272a; margin-bottom:8px;">
+                <span style="color:#fff; font-size:14px;">${pName}</span>
+                <button onclick="executeMove('${pName}')" style="background:#fbbf24; color:#000; border:none; padding:6px 12px; border-radius:8px; font-weight:bold; cursor:pointer;">Pilih</button>
+            </div>`;
+    }
+    
+    document.getElementById('newPlaylistInput').style.display = 'none'; // Sembunyiin input buat baru
+    saveModal.style.display = 'flex';
+}
+
+async function executeMove(targetPlaylist) {
+    if (!moveData) return;
+    const { source, song } = moveData;
+
+    // 1. Tambah ke playlist baru
+    if (!allPlaylists[targetPlaylist].some(s => s.videoId === song.videoId)) {
+        allPlaylists[targetPlaylist].push(song);
+        await fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playlistName: targetPlaylist, videoId: song.videoId, title: song.title, channel: song.channel })
+        });
+    }
+
+    // 2. Hapus dari playlist lama
+    allPlaylists[source] = allPlaylists[source].filter(s => s.videoId !== song.videoId);
+    await fetch(API_URL, {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playlistName: source, videoId: song.videoId })
+    });
+
+    document.getElementById('saveModal').style.display = 'none';
+    moveData = null; renderPlaylistGrid(); closePlaylistManager();
 }
