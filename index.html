@@ -3,105 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aissistant</title>
+    <title>Aissistant Dashboard</title>
     <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <style>
-        body { padding: 40px 20px 100px 20px; }
+        body { padding: 30px 20px 100px 20px; }
         .header { margin-bottom: 25px; }
-        .header h1 { font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -1px; color: var(--text-main); }
-        .header p { color: var(--accent); font-size: 14px; margin-top: 6px; font-weight: 700; letter-spacing: 0.5px;}
-        
-        .card { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid #27272a; border-radius: 20px; padding: 20px; text-decoration: none; color: inherit; transition: 0.2s ease; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);}
-        .card:active { transform: scale(0.97); border-color: var(--accent);}
-        .card-left { display: flex; align-items: center; gap: 16px; }
-        .icon-box { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background: #27272a; border-radius: 14px; color: var(--accent); }
-        .card-title { font-size: 16px; font-weight: 700; margin: 0; color: var(--text-main);}
-        .card-subtitle { font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0; font-weight: 600;}
+        .header h1 { font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -1px; color: var(--text-main); }
+        .header p { color: var(--accent); font-size: 12px; margin-top: 4px; font-weight: 800; letter-spacing: 1px;}
     </style>
 </head>
 <body class="page-transition">
     <div class="header">
         <h1>Aissistant</h1>
-        <p>PERSONAL BACKEND</p>
+        <p>PERSONAL ASSISTANT</p>
     </div>
 
-    <!-- Semua Menu Dikembalikan Secara Full -->
-    <a href="music.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
-            <div>
-                <p class="card-title">Aismusic</p>
-                <p class="card-subtitle">Smart Audio Player</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
+    <div class="widget-grid">
+        <a href="wallet.html" style="text-decoration:none;" class="widget">
+            <div class="widget-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg> DOMPET AIS</div>
+            <h3 class="widget-value" id="widSaldo">Memuat...</h3>
+            <svg class="widget-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"></rect></svg>
+        </a>
 
-    <a href="task.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></div>
-            <div>
-                <p class="card-title">Ais Task</p>
-                <p class="card-subtitle">Kanban & To-Do Board</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
+        <a href="ibadah.html" style="text-decoration:none;" class="widget">
+            <div class="widget-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> STATUS IBADAH</div>
+            <h3 class="widget-value" id="widIbadah" style="font-size: 15px;">Mengecek jam...</h3>
+            <div class="widget-sub" id="widIbadahSub"></div>
+        </a>
 
-    <a href="wallet.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></div>
-            <div>
-                <p class="card-title">Dompet Ais</p>
-                <p class="card-subtitle">Finance & Cash Tracker</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
+        <a href="music.html" style="text-decoration:none;" class="widget">
+            <div class="widget-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg> TERAKHIR DIPUTAR</div>
+            <h3 class="widget-value" id="widMusic" style="font-size: 14px; font-weight: 600; line-height:1.4;">Mengecek...</h3>
+        </a>
 
-    <a href="ideas.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-            <div>
-                <p class="card-title">Bubble Ideas</p>
-                <p class="card-subtitle">Catatan & Brainstorming</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
+        <a href="journal.html" style="text-decoration:none;" class="widget">
+            <div class="widget-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> AIS JOURNAL</div>
+            <h3 class="widget-value" id="widJurnal" style="font-size: 14px; font-weight: 600; line-height:1.4;">Mengecek...</h3>
+        </a>
+    </div>
 
-    <a href="journal.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
-            <div>
-                <p class="card-title">Ais Journal</p>
-                <p class="card-subtitle">Buku Harian Pribadi</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
-
-    <a href="workout.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-            <div>
-                <p class="card-title">Ais Fitness</p>
-                <p class="card-subtitle">Workout & Protein Tracker</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
-
-    <a href="ibadah.html" class="card">
-        <div class="card-left">
-            <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
-            <div>
-                <p class="card-title">Ais Ibadah</p>
-                <p class="card-subtitle">Mutabaah Yaumiyah & Murojaah</p>
-            </div>
-        </div>
-        <div><svg width="20" height="20" viewBox="0 0 24 24" stroke="#555" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-    </a>
+    <div class="section-title">SEMUA MODUL</div>
+    <div class="menu-grid">
+        <a href="music.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <span class="menu-text">Music</span>
+        </a>
+        <a href="task.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span class="menu-text">Task</span>
+        </a>
+        <a href="wallet.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            <span class="menu-text">Wallet</span>
+        </a>
+        <a href="ideas.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span class="menu-text">Ideas</span>
+        </a>
+        <a href="journal.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span class="menu-text">Journal</span>
+        </a>
+        <a href="workout.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span class="menu-text">Fitness</span>
+        </a>
+        <a href="ibadah.html" class="menu-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <span class="menu-text">Ibadah</span>
+        </a>
+    </div>
 
     <div class="bottom-nav">
         <a href="index.html" class="nav-item active">
@@ -121,5 +93,7 @@
             <span>Wallet</span>
         </a>
     </div>
+
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

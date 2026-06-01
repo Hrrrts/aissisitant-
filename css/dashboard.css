@@ -1,0 +1,15 @@
+/* SMART WIDGETS */
+.widget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
+.widget { background: var(--bg-card); border: 1px solid #27272a; border-radius: 18px; padding: 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 80px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+.widget-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;}
+.widget-value { font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.2;}
+.widget-sub { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+.widget-icon { position: absolute; right: -10px; bottom: -10px; opacity: 0.05; width: 60px; height: 60px; }
+
+/* COMPACT MENU GRID */
+.section-title { font-size: 14px; color: var(--text-main); font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; }
+.menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;}
+.menu-btn { background: var(--bg-card); border: 1px solid #27272a; border-radius: 16px; padding: 16px 8px; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
+.menu-btn:active { transform: scale(0.95); border-color: var(--accent); background: #1f1f22;}
+.menu-icon { width: 32px; height: 32px; color: var(--accent); }
+.menu-text { color: var(--text-main); font-size: 12px; font-weight: 700; text-align: center; }
