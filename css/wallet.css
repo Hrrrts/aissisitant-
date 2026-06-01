@@ -1,0 +1,32 @@
+/* Khusus styling Dompet Ais */
+body { padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
+.top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
+.back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+.title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+
+.balance-card { background: linear-gradient(135deg, var(--bg-card), var(--bg-main)); border: 1px solid #27272a; border-radius: 20px; padding: 30px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+.balance-title { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 700;}
+.balance-amount { font-size: 36px; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -1px;}
+
+.action-buttons { display: flex; gap: 15px; margin-bottom: 30px; }
+.btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
+.btn:active { transform: scale(0.96); }
+.btn-income { background-color: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.btn-expense { background-color: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+
+.input-section { background: var(--bg-card); border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 30px; display: none; animation: slideDown 0.3s ease;}
+@keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+
+.input-box { width: 100%; background: var(--bg-main); border: 1px solid #27272a; color: var(--text-main); padding: 14px; border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 12px; box-sizing: border-box; font-family: inherit;}
+.input-box:focus { border-color: var(--accent); }
+.btn-submit { background: var(--text-main); color: var(--bg-main); width: 100%; padding: 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer;}
+
+.section-title { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: 700; }
+.history-list { display: flex; flex-direction: column; gap: 12px; }
+.tx-card { background: var(--bg-card); border: 1px solid #27272a; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;}
+.tx-info { display: flex; flex-direction: column; gap: 4px; }
+.tx-desc { font-size: 15px; font-weight: 600; color: var(--text-main); }
+.tx-date { font-size: 11px; color: #666; }
+.tx-amount { font-size: 15px; font-weight: bold; }
+.text-green { color: #4ade80; }
+.text-red { color: #f87171; }

@@ -4,41 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dompet Ais</title>
+    <!-- Manggil CSS yang udah dipisah -->
     <link rel="stylesheet" href="css/global.css">
-    <style>
-        body { padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
-        .top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
-        .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
-        .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
-        
-        .balance-card { background: linear-gradient(135deg, var(--bg-card), var(--bg-main)); border: 1px solid #27272a; border-radius: 20px; padding: 30px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
-        .balance-title { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 700;}
-        .balance-amount { font-size: 36px; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -1px;}
-        
-        .action-buttons { display: flex; gap: 15px; margin-bottom: 30px; }
-        .btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
-        .btn:active { transform: scale(0.96); }
-        .btn-income { background-color: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
-        .btn-expense { background-color: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
-
-        .input-section { background: var(--bg-card); border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 30px; display: none; animation: slideDown 0.3s ease;}
-        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-        
-        /* INI KUNCI FIX-NYA: Kita pake font monospace biar angka rapi */
-        .input-box { width: 100%; background: var(--bg-main); border: 1px solid #27272a; color: var(--text-main); padding: 14px; border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 12px; box-sizing: border-box; font-family: inherit;}
-        .input-box:focus { border-color: var(--accent); }
-        .btn-submit { background: var(--text-main); color: var(--bg-main); width: 100%; padding: 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer;}
-        
-        .section-title { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: 700; }
-        .history-list { display: flex; flex-direction: column; gap: 12px; }
-        .tx-card { background: var(--bg-card); border: 1px solid #27272a; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;}
-        .tx-info { display: flex; flex-direction: column; gap: 4px; }
-        .tx-desc { font-size: 15px; font-weight: 600; color: var(--text-main); }
-        .tx-date { font-size: 11px; color: #666; }
-        .tx-amount { font-size: 15px; font-weight: bold; }
-        .text-green { color: #4ade80; }
-        .text-red { color: #f87171; }
-    </style>
+    <link rel="stylesheet" href="css/wallet.css">
 </head>
 <body class="page-transition">
     <div class="top-bar">
@@ -67,10 +35,7 @@
 
     <div class="input-section" id="inputSection">
         <h3 id="formTitle" style="margin-top:0; margin-bottom:15px; font-size:16px;">Tambah Catatan</h3>
-        
-        <!-- TIPE INPUT UDAH GANTI JADI TEXT, INPUTMODE NUMERIC BUKAN NUMBER LAGI -->
         <input type="text" id="txAmount" class="input-box" inputmode="numeric" placeholder="Nominal (Cth: 25.000)">
-        
         <input type="text" id="txDesc" class="input-box" placeholder="Keterangan (Cth: Beli Ayam Geprek)">
         <input type="hidden" id="txType">
         <button class="btn-submit" onclick="submitTransaction()">Simpan ke Database</button>
@@ -81,7 +46,6 @@
         <p style="text-align:center; color:#555; font-size:13px;">Memuat data dari server...</p>
     </div>
 
-    <!-- BOTTOM NAVIGATION BAR -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -101,107 +65,7 @@
         </a>
     </div>
 
-    <script>
-        function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-        }
-
-        async function loadWallet() {
-            try {
-                const res = await fetch('/api/wallet');
-                const data = await res.json();
-                
-                document.getElementById('balanceText').innerText = formatRupiah(data.balance);
-                
-                const list = document.getElementById('historyList');
-                if (data.txs.length === 0) {
-                    list.innerHTML = '<p style="text-align:center; color:#555; font-size:13px;">Belum ada transaksi.</p>';
-                    return;
-                }
-
-                list.innerHTML = data.txs.map(tx => {
-                    const dateObj = new Date(tx.date);
-                    const dateStr = dateObj.toLocaleDateString('id-ID', {day:'numeric', month:'short'}) + ' • ' + dateObj.getHours() + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-                    const isIncome = tx.type === 'income';
-                    
-                    return `
-                    <div class="tx-card">
-                        <div class="tx-info">
-                            <div class="tx-desc">${tx.desc}</div>
-                            <div class="tx-date">${dateStr}</div>
-                        </div>
-                        <div class="tx-amount ${isIncome ? 'text-green' : 'text-red'}">
-                            ${isIncome ? '+' : '-'}${formatRupiah(tx.amount)}
-                        </div>
-                    </div>
-                    `;
-                }).join('');
-            } catch (error) {
-                document.getElementById('historyList').innerHTML = '<p style="color:#f87171; text-align:center;">Gagal terhubung ke database.</p>';
-            }
-        }
-
-        function showForm(type) {
-            const section = document.getElementById('inputSection');
-            section.style.display = 'block';
-            document.getElementById('txType').value = type;
-            
-            const title = document.getElementById('formTitle');
-            if(type === 'income') {
-                title.innerText = 'Catat Pemasukan';
-                title.style.color = '#4ade80';
-            } else {
-                title.innerText = 'Catat Pengeluaran';
-                title.style.color = '#f87171';
-            }
-        }
-
-        // FORMAT TITIK OTOMATIS SAAT LU NGETIK
-        document.getElementById('txAmount').addEventListener('input', function(e) {
-            let value = this.value.replace(/[^0-9]/g, '');
-            if (value) {
-                this.value = new Intl.NumberFormat('id-ID').format(value);
-            } else {
-                this.value = '';
-            }
-        });
-
-        async function submitTransaction() {
-            // TARIK ANGKA MENTAH DARI KOTAK
-            const rawAmount = document.getElementById('txAmount').value;
-            // HAPUS SEMUA TITIK BIAR BISA DIHITUNG SERVER
-            const amount = rawAmount.replace(/\./g, '');
-            
-            const desc = document.getElementById('txDesc').value;
-            const type = document.getElementById('txType').value;
-
-            if(!amount || !desc) return alert("Isi nominal dan keterangan dulu!");
-
-            const btn = document.querySelector('.btn-submit');
-            btn.innerText = 'Menyimpan...';
-
-            try {
-                const res = await fetch('/api/wallet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type, amount, desc })
-                });
-                const data = await res.json();
-                
-                if(data.success) {
-                    document.getElementById('txAmount').value = '';
-                    document.getElementById('txDesc').value = '';
-                    document.getElementById('inputSection').style.display = 'none';
-                    btn.innerText = 'Simpan ke Database';
-                    loadWallet(); 
-                }
-            } catch (error) {
-                alert("Gagal menyimpan ke server!");
-                btn.innerText = 'Simpan ke Database';
-            }
-        }
-
-        loadWallet();
-    </script>
+    <!-- Manggil JS yang udah dipisah -->
+    <script src="js/wallet.js"></script>
 </body>
 </html>
