@@ -1,12 +1,22 @@
-/* Khusus styling Dompet Ais */
 body { padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
 .top-bar { display: flex; align-items: center; margin-bottom: 30px; margin-top: 10px; }
 .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
 .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
 
-.balance-card { background: linear-gradient(135deg, var(--bg-card), var(--bg-main)); border: 1px solid #27272a; border-radius: 20px; padding: 30px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+.balance-card { background: linear-gradient(135deg, var(--bg-card), var(--bg-main)); border: 1px solid #27272a; border-radius: 20px; padding: 30px 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
 .balance-title { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 700;}
 .balance-amount { font-size: 36px; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -1px;}
+
+/* KOTAK LAPORAN BULANAN BARU */
+.monthly-report { display: flex; gap: 15px; margin-bottom: 25px; }
+.report-box { flex: 1; background: var(--bg-card); border: 1px solid #27272a; padding: 15px; border-radius: 16px; text-align: left;}
+.report-box span { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.report-box h4 { margin: 8px 0 0 0; font-size: 16px; font-weight: 800;}
+.report-income h4 { color: #4ade80; }
+.report-expense h4 { color: #f87171; }
+
+/* WADAH GRAFIK CHART.JS */
+.chart-container { background: var(--bg-card); border: 1px solid #27272a; border-radius: 16px; padding: 15px; margin-bottom: 30px; height: 200px; width: 100%; box-sizing: border-box;}
 
 .action-buttons { display: flex; gap: 15px; margin-bottom: 30px; }
 .btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}

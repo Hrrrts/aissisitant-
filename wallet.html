@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dompet Ais</title>
-    <!-- Manggil CSS yang udah dipisah -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/wallet.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="page-transition">
     <div class="top-bar">
@@ -20,6 +20,21 @@
     <div class="balance-card">
         <div class="balance-title">Total Saldo</div>
         <h1 class="balance-amount" id="balanceText">Rp 0</h1>
+    </div>
+
+    <div class="monthly-report">
+        <div class="report-box report-income">
+            <span>Masuk Bulan Ini</span>
+            <h4 id="monthIncomeText">Rp 0</h4>
+        </div>
+        <div class="report-box report-expense">
+            <span>Keluar Bulan Ini</span>
+            <h4 id="monthExpenseText">Rp 0</h4>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="walletChart"></canvas>
     </div>
 
     <div class="action-buttons">
@@ -65,7 +80,6 @@
         </a>
     </div>
 
-    <!-- Manggil JS yang udah dipisah -->
     <script src="js/wallet.js"></script>
 </body>
 </html>
