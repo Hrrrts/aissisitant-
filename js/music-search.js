@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadSearchHistory();
-    fetchTrendingMusic(); // Ini yang bikin Explore jalan!
+    fetchTrendingMusic(); 
 });
 
 function loadSearchHistory() {
@@ -9,7 +9,11 @@ function loadSearchHistory() {
     if(!container) return;
     if(history.length === 0) { container.style.display = 'none'; return; }
     container.style.display = 'flex';
-    container.innerHTML = history.map(q => `<div class="history-pill" onclick="executeSearch('${q.replace(/'/g, "\\'")}')">🕒 ${q}</div>`).join('');
+    
+    // Icon SVG Jam elegan sebagai pengganti emot
+    const clockSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px; vertical-align:middle; position:relative; top:-1px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+    
+    container.innerHTML = history.map(q => `<div class="history-pill" onclick="executeSearch('${q.replace(/'/g, "\\'")}')">${clockSvg}${q}</div>`).join('');
 }
 
 function saveSearchHistory(query) {
@@ -44,7 +48,6 @@ async function executeSearch(query) {
         const data = await response.json();
         if(Array.isArray(data) && data.length > 0) {
             searchResults.innerHTML = data.map(item => {
-                // Biar aman dari tanda kutip di judul lagu
                 const safeTitle = encodeURIComponent(item.title);
                 const safeChannel = encodeURIComponent(item.channel);
                 return `
@@ -76,7 +79,6 @@ function loadSongToPlayer(videoId, title, channel) {
     fetchLyrics(title, channel);
 }
 
-// Sudah diupdate biar bisa baca encode (tanda kutip)
 function selectSong(videoId, title, channel, isEncoded = false) {
     const sr = document.getElementById('searchResults');
     if(sr) sr.style.display = 'none';
@@ -113,7 +115,6 @@ function playNextLogics() {
     }
 }
 
-// LOGIKA RADIO PINTAR (SUDAH DIUPDATE)
 async function fetchSimilarVibes() {
     const currentTitle = playHistory[historyIndex].title;
     let currentArtist = playHistory[historyIndex].channel;
@@ -136,7 +137,6 @@ async function fetchSimilarVibes() {
     } catch (e) { if(ft) ft.innerText = "Error memuat radio"; }
 }
 
-// LOGIKA EXPLORE TRENDING (BARU)
 async function fetchTrendingMusic() {
     const grid = document.getElementById('exploreGrid');
     if (!grid) return;
