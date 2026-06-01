@@ -7,6 +7,7 @@ let historyIndex = -1;
 let parsedLyrics = [];
 let currentLyricIndex = -1;
 let allPlaylists = {}; 
+let currentManagingPlaylist = ''; // Buat nandain playlist apa yg lagi dibuka
 
 const playIconSvg = '▶';
 const pauseIconSvg = '⏸';
@@ -55,6 +56,10 @@ window.addEventListener('popstate', (e) => {
     if (fp && fp.classList.contains('open')) {
         fp.classList.remove('open');
     }
+    const pm = document.getElementById('playlistManagerModal');
+    if (pm && pm.style.display === 'flex') {
+        pm.style.display = 'none';
+    }
 });
 
 async function loadPlaylistsToHome() {
@@ -73,8 +78,9 @@ async function loadPlaylistsToHome() {
             const songs = allPlaylists[name];
             const coverImage = songs.length > 0 ? `https://img.youtube.com/vi/${songs[0].videoId}/hqdefault.jpg` : '';
             
+            // UBAH ONCLICK JADI BUKA MODAL MANAGER, BUKAN LANGSUNG MUTER
             html += `
-                <div class="playlist-card" style="background-image: url('${coverImage}');" onclick='playFromFolder("${name}")'>
+                <div class="playlist-card" style="background-image: url('${coverImage}');" onclick='openPlaylistManager("${name.replace(/'/g, "\\'")}")'>
                     <div class="playlist-overlay"></div>
                     <div class="playlist-info">
                         <div class="pl-card-title">${name}</div>
@@ -90,11 +96,73 @@ async function loadPlaylistsToHome() {
     }
 }
 
-function playFromFolder(playlistName) {
-    const songs = allPlaylists[playlistName];
-    if(!songs || songs.length === 0) return;
-    selectSong(songs[0].videoId, songs[0].title, songs[0].channel);
+// === LOGIKA JENDELA MANAJEMEN PLAYLIST BARU ===
+function openPlaylistManager(playlistName) {
+    currentManagingPlaylist = playlistName;
+    const modal = document.getElementById('playlistManagerModal');
+    const title = document.getElementById('pmTitle');
+    
+    title.innerText = playlistName;
+    modal.style.display = 'flex';
+    history.pushState({ modal: 'playlistManager' }, ''); 
+    
+    renderPlaylistManagerSongs();
 }
+
+function closePlaylistManager() {
+    document.getElementById('playlistManagerModal').style.display = 'none';
+}
+
+function renderPlaylistManagerSongs() {
+    const list = document.getElementById('pmSongList');
+    const songs = allPlaylists[currentManagingPlaylist] || [];
+    
+    if (songs.length === 0) {
+        list.innerHTML = '<div style="color:#888; font-size:14px; text-align:center; margin-top:20px;">Playlist ini kosong.</div>';
+        return;
+    }
+
+    list.innerHTML = songs.map(song => `
+        <div style="background:#09090b; border:1px solid #27272a; padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="flex:1; overflow:hidden; margin-right:10px; cursor:pointer;" onclick="playFromManager('${song.videoId}', '${song.title.replace(/'/g, "\\'")}', '${song.channel.replace(/'/g, "\\'")}')">
+                <div style="color:#fff; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;">${song.title}</div>
+                <div style="color:#a1a1aa; font-size:12px;">${song.channel}</div>
+            </div>
+            <button onclick="removeFromPlaylist('${song.videoId}')" style="background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:0.2s;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+function playFromManager(videoId, title, channel) {
+    closePlaylistManager();
+    selectSong(videoId, title, channel);
+}
+
+async function removeFromPlaylist(videoId) {
+    if(!confirm('Yakin mau hapus lagu ini dari playlist?')) return;
+    
+    try {
+        const response = await fetch('/api/playlist', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playlistName: currentManagingPlaylist,
+                videoId: videoId
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            allPlaylists[currentManagingPlaylist] = allPlaylists[currentManagingPlaylist].filter(s => s.videoId !== videoId);
+            renderPlaylistManagerSongs(); // Refresh list di modal
+            loadPlaylistsToHome(); // Refresh jumlah lagu di layar utama belakang layar
+        }
+    } catch (e) {
+        alert('Gagal menghapus lagu dari database.');
+    }
+}
+// ============================================
 
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -157,7 +225,6 @@ if(pbInput) {
     });
 }
 
-// BISA PENCET TOMBOL ENTER UNTUK NYARI
 const searchBtn = document.getElementById('searchBtn');
 const searchInput = document.getElementById('searchInput');
 
@@ -174,7 +241,7 @@ if(searchInput) {
         if(e.key === 'Enter') {
             const query = e.target.value;
             if(query) executeSearch(query);
-            searchInput.blur(); // Nutup keyboard HP otomatis
+            searchInput.blur(); 
         }
     });
 }
@@ -238,7 +305,6 @@ function playNextLogics() {
     }
 }
 
-// ALGORITMA VIBES BARU: MENGHINDARI COVER DAN LIVE
 async function fetchSimilarVibes() {
     const currentTitle = playHistory[historyIndex].title;
     const currentArtist = playHistory[historyIndex].channel;

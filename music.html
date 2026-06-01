@@ -41,7 +41,9 @@
                 <p style="color:#888; font-size:13px; grid-column: span 2;">Memuat data dari server...</p>
             </div>
         </div>
-    </div> <div id="miniPlayer" class="mini-player" onclick="openFullPlayer()">
+    </div> 
+
+    <div id="miniPlayer" class="mini-player" onclick="openFullPlayer()">
         <img id="miniThumb" src="" alt="Thumb" style="display:none;">
         <div class="mini-info">
             <div id="miniTitle" class="mini-title">Belum ada lagu</div>
@@ -100,6 +102,18 @@
             </div>
         </div>
     </div>
+
+    <div id="playlistManagerModal" style="display:none; z-index:9999; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:flex-end; backdrop-filter:blur(5px);">
+        <div style="background:#18181b; padding:24px; border-radius:24px 24px 0 0; width:100%; max-height:80vh; border-top:1px solid #27272a; box-sizing:border-box; display:flex; flex-direction:column; animation: slideUp 0.3s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 id="pmTitle" style="margin:0; color:#fff; font-size:20px;">Nama Playlist</h3>
+                <button onclick="closePlaylistManager()" style="background:none; border:none; color:#a1a1aa; font-size:28px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="pmSongList" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; padding-bottom:20px;">
+                </div>
+        </div>
+    </div>
+    <style>@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }</style>
     
     <div id="playerContainer" style="display: none;"></div>
 
