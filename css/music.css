@@ -1,64 +1,68 @@
-body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent;}
-.main-content { padding: 20px; height: 100vh; overflow-y: auto; box-sizing: border-box;}
+body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent;}
+
+/* Padding bawah ditambah biar layar bisa discroll melewati mini player & bottom nav */
+.main-content { padding: 20px; padding-bottom: 160px; height: 100vh; overflow-y: auto; box-sizing: border-box;}
+
 .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; margin-top: 10px; }
 .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
 .title-header { font-size: 15px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px;}
 
 .search-container { display: flex; gap: 10px; margin-bottom: 12px;}
-.search-input { flex: 1; background: #151515; border: 1px solid #333; color: #fff; padding: 14px 20px; border-radius: 24px; font-size: 15px; outline: none; }
+.search-input { flex: 1; background: #18181b; border: 1px solid #27272a; color: #fff; padding: 14px 20px; border-radius: 24px; font-size: 15px; outline: none; }
 .search-btn { background: #fff; color: #000; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;}
 
-/* STYLE RIWAYAT PENCARIAN BARU */
 .search-history { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 5px; scrollbar-width: none; }
 .search-history::-webkit-scrollbar { display: none; }
-.history-pill { background: #222; color: #aaa; padding: 8px 14px; border-radius: 16px; font-size: 12px; white-space: nowrap; cursor: pointer; border: 1px solid #333; transition: 0.2s;}
-.history-pill:active { background: #444; color: #fff; }
+.history-pill { background: #18181b; color: #a1a1aa; padding: 8px 14px; border-radius: 16px; font-size: 12px; white-space: nowrap; cursor: pointer; border: 1px solid #27272a; transition: 0.2s;}
+.history-pill:active { background: #27272a; color: #fff; }
 
-.search-results { display: none; background: #151515; border: 1px solid #333; border-radius: 16px; max-height: 300px; overflow-y: auto; margin-bottom:20px;}
-.result-item { padding: 16px 20px; border-bottom: 1px solid #222; cursor: pointer; }
-.result-item:active { background: #222; }
+.search-results { display: none; background: #18181b; border: 1px solid #27272a; border-radius: 16px; max-height: 300px; overflow-y: auto; margin-bottom:20px;}
+.result-item { padding: 16px 20px; border-bottom: 1px solid #27272a; cursor: pointer; }
+.result-item:active { background: #27272a; }
 .result-title { font-weight: 600; color: #fff; margin-bottom: 4px; font-size:14px;}
 .result-channel { font-size: 12px; color: #888; }
 
 .home-screen { margin-top: 10px; }
-.section-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; color:#fff;}
+.section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color:#fff;}
 .playlist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-.playlist-card { position: relative; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; aspect-ratio: 1/1; background-color: #1a1a1a; background-size: cover; background-position: center;}
+.playlist-card { position: relative; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; aspect-ratio: 1/1; background-color: #18181b; background-size: cover; background-position: center;}
 .playlist-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9) 100%); z-index: 1;}
 .playlist-info { position: relative; z-index: 2; padding: 12px; }
 .pl-card-title { font-weight: bold; font-size: 14px; color: #fff; margin-bottom: 2px;}
-.pl-card-count { font-size: 11px; color: #aaa;}
+.pl-card-count { font-size: 11px; color: #a1a1aa;}
 
-.mini-player { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #222; border-radius: 12px; padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 50; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.9); transform: translateY(150%); transition: transform 0.3s ease;}
+/* MINI PLAYER DIANGKAT KE ATAS (bottom: 90px) */
+.mini-player { position: fixed; bottom: 90px; left: 20px; right: 20px; background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 50; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.9); transform: translateY(200%); transition: transform 0.3s ease;}
 .mini-player.show { transform: translateY(0); }
 .mini-player img { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; margin-right: 12px; }
 .mini-info { flex: 1; overflow: hidden; }
 .mini-title { font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;}
-.mini-artist { font-size: 12px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.mini-artist { font-size: 12px; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .mini-controls { display: flex; gap: 5px; align-items: center;}
 
-.full-player { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #121212; z-index: 100; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto;}
+.full-player { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #09090b; z-index: 100; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto;}
 .full-player.open { transform: translateY(0); }
 .fp-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; margin-top: 10px;}
 
-.album-art { width: 100%; max-width: 340px; aspect-ratio: 1/1; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 40px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.6);}
+.album-art { width: 100%; max-width: 340px; aspect-ratio: 1/1; background: #18181b; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 40px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.6);}
 .album-img { width: 100%; height: 100%; object-fit: cover; }
 
 .song-info-container { width: 100%; max-width: 350px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;}
 .song-title { font-size: 24px; font-weight: bold; margin: 0 0 4px 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.song-artist { font-size: 16px; color: #aaa; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.song-artist { font-size: 16px; color: #a1a1aa; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
-.like-btn { background: none; border: none; font-size: 28px; color: #1db954; cursor: pointer; transition: 0.2s; padding: 0 10px;}
+/* Aksen Warna Midnight Colornote */
+.like-btn { background: none; border: none; font-size: 28px; color: #fbbf24; cursor: pointer; transition: 0.2s; padding: 0 10px;}
 .like-btn:active { transform: scale(0.8); }
 
 .progress-container { width: 100%; max-width: 350px; display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
 .time-text { font-size: 12px; color: #888; width: 35px; text-align: center; font-variant-numeric: tabular-nums; }
-.progress-bar { flex: 1; height: 4px; -webkit-appearance: none; background: #333; border-radius: 2px; outline: none; }
-.progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
+.progress-bar { flex: 1; height: 4px; -webkit-appearance: none; background: #27272a; border-radius: 2px; outline: none; }
+.progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fbbf24; cursor: pointer; }
 
 .controls { display: flex; align-items: center; justify-content: center; width: 100%; gap: 30px; margin-bottom: 40px;}
-.play-btn { width: 68px; height: 68px; border-radius: 50%; background: #fff; color: #000; border: none; font-size:24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
+.play-btn { width: 68px; height: 68px; border-radius: 50%; background: #fbbf24; color: #000; border: none; font-size:24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
 .play-btn:active { transform: scale(0.95); }
 .nav-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px; transition: 0.2s; opacity: 0.8;}
 .nav-btn:active { transform: scale(0.8); opacity: 1;}
@@ -66,4 +70,4 @@ body { background-color: #000000; color: #ededed; font-family: -apple-system, Bl
 .lyrics-section { width: 100%; max-width: 350px; }
 .lyrics-box { background: transparent; padding: 0; font-size: 18px; line-height: 2.2; color: #777; text-align: center; height: 400px; overflow-y: auto; display: none; position: relative; font-weight:600;}
 .lyric-line { transition: 0.3s ease; padding: 4px 0; }
-.lyric-active { color: #fff; font-size: 20px; transform: scale(1.05); }
+.lyric-active { color: #fbbf24; font-size: 20px; transform: scale(1.05); }

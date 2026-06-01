@@ -25,16 +25,23 @@
         <div id="searchHistory" class="search-history"></div>
         <div id="searchResults" class="search-results"></div>
 
+        <div id="exploreScreen" class="home-screen" style="margin-bottom: 20px; margin-top: 20px;">
+            <h3 class="section-title">Explore Music</h3>
+            <div class="search-history" style="margin-bottom:0;">
+                <div class="history-pill" onclick="executeSearch('Top Hits Indonesia Official Audio')">🔥 Top Hits</div>
+                <div class="history-pill" onclick="executeSearch('Indie Lokal Vibes Official Audio')">☕ Indie Lokal</div>
+                <div class="history-pill" onclick="executeSearch('Lofi Chill Beathop')">🌧️ Lofi Chill</div>
+                <div class="history-pill" onclick="executeSearch('Gym Workout EDM Official')">💪 Workout EDM</div>
+            </div>
+        </div>
+
         <div id="homeScreen" class="home-screen">
             <h3 class="section-title">Koleksi Playlist</h3>
             <div id="playlistGrid" class="playlist-grid">
                 <p style="color:#888; font-size:13px; grid-column: span 2;">Memuat data dari server...</p>
             </div>
         </div>
-        <div style="height: 100px;"></div>
-    </div>
-
-    <div id="miniPlayer" class="mini-player" onclick="openFullPlayer()">
+    </div> <div id="miniPlayer" class="mini-player" onclick="openFullPlayer()">
         <img id="miniThumb" src="" alt="Thumb" style="display:none;">
         <div class="mini-info">
             <div id="miniTitle" class="mini-title">Belum ada lagu</div>
@@ -81,7 +88,6 @@
         </div>
     </div>
 
-    <!-- MODAL SIMPAN PLAYLIST -->
     <div id="saveModal" style="display:none; z-index:9999; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(5px);">
         <div style="background:#18181b; padding:24px; border-radius:20px; width:80%; max-width:320px; border:1px solid #27272a;">
             <h3 style="margin-top:0; color:#fff; font-size:18px;">Pilih Playlist</h3>
@@ -97,7 +103,6 @@
     
     <div id="playerContainer" style="display: none;"></div>
 
-    <!-- BOTTOM NAVIGATION BAR -->
     <div class="bottom-nav">
         <a href="index.html" class="nav-item">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
