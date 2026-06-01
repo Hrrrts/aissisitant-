@@ -82,6 +82,20 @@
     </div>
     
     <div id="playerContainer" style="display: none;"></div>
+    <!-- JENDELA PILIH PLAYLIST -->
+    <div id="saveModal" class="full-player" style="justify-content:flex-end; background:rgba(0,0,0,0.85); padding:0; align-items:stretch;">
+        <div style="background:#111; border-top:1px solid #333; border-radius:24px 24px 0 0; padding:24px; max-height:80vh; overflow-y:auto; color:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Simpan ke Playlist</h3>
+                <button onclick="closeSaveModal()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="existingPlaylistsList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="newPlaylistInput" style="flex:1; background:#000; border:1px solid #333; color:#fff; padding:12px; border-radius:12px; font-family:inherit; outline:none;" placeholder="Bikin folder baru...">
+                <button onclick="confirmSavePlaylist()" style="background:#6366f1; color:#fff; border:none; padding:0 20px; border-radius:12px; font-weight:bold; cursor:pointer;">Simpan</button>
+            </div>
+        </div>
+    </div>
     <script src="js/music.js"></script>
 </body>
 </html>

@@ -384,3 +384,63 @@ async function addToPlaylist() {
         } else { alert(data.error); }
     } catch (error) { alert("Error database."); }
 }
+
+// === LOGIKA JENDELA MODAL PLAYLIST ===
+function addToPlaylist() {
+    if (!currentVideoId) return;
+    const modal = document.getElementById('saveModal');
+    const listContainer = document.getElementById('savePlaylistList');
+    
+    // Tampilkan daftar playlist yang ada sebagai tombol
+    listContainer.innerHTML = '';
+    for (let name in allPlaylists) {
+        if (name === "Lagu Disukai") continue; // Abaikan folder Love
+        listContainer.innerHTML += `
+            <button onclick="saveToExisting('${name.replace(/'/g, "\\'")}')" style="background:#27272a; color:#fff; border:none; padding:12px; border-radius:10px; text-align:left; font-family:inherit; font-weight:600; cursor:pointer;">
+                + ${name}
+            </button>
+        `;
+    }
+    
+    if(listContainer.innerHTML === '') {
+        listContainer.innerHTML = '<div style="color:#555; font-size:13px;">Belum ada playlist selain Lagu Disukai.</div>';
+    }
+    
+    document.getElementById('newPlaylistInput').value = '';
+    modal.style.display = 'flex';
+}
+
+async function saveToExisting(playlistName) {
+    document.getElementById('saveModal').style.display = 'none';
+    await executeSaveToDB(playlistName);
+}
+
+async function saveToNewPlaylist() {
+    const input = document.getElementById('newPlaylistInput').value;
+    if (!input.trim()) return alert("Nama playlist nggak boleh kosong!");
+    document.getElementById('saveModal').style.display = 'none';
+    await executeSaveToDB(input.trim());
+}
+
+async function executeSaveToDB(playlistName) {
+    try {
+        const response = await fetch('/api/playlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playlistName: playlistName,
+                videoId: currentVideoId,
+                title: document.getElementById('fullTitle').innerText,
+                channel: document.getElementById('fullArtist').innerText
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert(`Lagu ditambahkan ke ${playlistName}!`);
+            loadPlaylistsToHome(); // Refresh otomatis
+        } else { alert(data.error); }
+    } catch (error) { alert("Error database."); }
+}
+
+// Override fungsi lama yang pakai prompt
+window.addToPlaylist = addToPlaylist;
