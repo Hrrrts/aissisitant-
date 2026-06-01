@@ -14,7 +14,6 @@ async function loadPlaylistsFromDB() {
     } catch (error) { allPlaylists = { "Lagu Favorit": [] }; }
 }
 
-// === FITUR LOVE ===
 function checkIfLiked() {
     if (!currentVideoId) return;
     const likeBtn = document.getElementById('likeBtn'); if (!likeBtn) return;
@@ -44,12 +43,9 @@ async function toggleLike() {
     } catch (e) { console.error(e); }
 }
 
-// === FITUR MODAL TAMBAH PLAYLIST ===
 function addToPlaylist() {
     if (!currentVideoId || historyIndex < 0) return;
     const saveModal = document.getElementById('saveModal');
-    
-    // Reset tampilan modal jika sebelumnya dipakai untuk fitur "Pindah"
     saveModal.querySelector('h3').innerText = 'Pilih Playlist';
     document.getElementById('newPlaylistInput').style.display = 'block';
 
@@ -100,7 +96,6 @@ async function saveToNewPlaylist() {
     });
 }
 
-// === TAMPILAN GRID HOME ===
 function renderPlaylistGrid() {
     const grid = document.getElementById('playlistGrid'); if (!grid) return;
     grid.innerHTML = '';
@@ -118,23 +113,27 @@ function renderPlaylistGrid() {
     }
 }
 
-// === FITUR MANAJEMEN PLAYLIST ===
+// === FITUR MANAJEMEN PLAYLIST DENGAN SVG ICONS ===
 function openPlaylistManager(playlistName) {
     currentManagingPlaylist = playlistName;
     const pm = document.getElementById('playlistManagerModal');
     const pmTitle = document.getElementById('pmTitle');
     
-    // Tombol Edit & Hapus khusus buat custom playlist
+    // Icon Edit (Pencil) & Delete (Trash) untuk Judul
     let editBtns = '';
     if (playlistName !== "Lagu Favorit") {
         editBtns = `
-            <div style="display:flex; gap:10px;">
-                <button onclick="renamePlaylist('${playlistName}')" style="background:none; border:none; font-size:18px; cursor:pointer;" title="Ganti Nama">✏️</button>
-                <button onclick="deleteEntirePlaylist('${playlistName}')" style="background:none; border:none; font-size:18px; cursor:pointer;" title="Hapus Playlist">🗑️</button>
+            <div style="display:flex; gap:12px; margin-left:10px; align-items:center;">
+                <button onclick="renamePlaylist('${playlistName}')" style="background:none; border:none; color:#a1a1aa; cursor:pointer; padding:0; display:flex;" title="Ganti Nama">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button onclick="deleteEntirePlaylist('${playlistName}')" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0; display:flex;" title="Hapus Playlist">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
             </div>`;
     }
 
-    pmTitle.innerHTML = `<div style="display:flex; align-items:center; gap:10px;">${playlistName} ${editBtns}</div>`;
+    pmTitle.innerHTML = `<div style="display:flex; align-items:center;">${playlistName} ${editBtns}</div>`;
     
     const pmSongList = document.getElementById('pmSongList');
     pmSongList.innerHTML = '';
@@ -143,25 +142,30 @@ function openPlaylistManager(playlistName) {
     if (songs.length === 0) {
         pmSongList.innerHTML = '<div style="color:#777; text-align:center; margin-top:20px;">Playlist ini masih kosong.</div>';
     } else {
-        // Tombol Putar Semua & Acak
+        // Icon Play & Shuffle
         pmSongList.innerHTML += `
             <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                <button onclick="playEntirePlaylist('${playlistName}', false)" style="flex:1; padding:10px; background:#fbbf24; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">▶ Putar Semua</button>
-                <button onclick="playEntirePlaylist('${playlistName}', true)" style="flex:1; padding:10px; background:#27272a; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">🔀 Acak</button>
+                <button onclick="playEntirePlaylist('${playlistName}', false)" style="flex:1; padding:10px; background:#fbbf24; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Putar Semua
+                </button>
+                <button onclick="playEntirePlaylist('${playlistName}', true)" style="flex:1; padding:10px; background:#27272a; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg> Acak
+                </button>
             </div>`;
 
         songs.forEach((song) => {
             const safeTitle = encodeURIComponent(song.title);
             const safeChannel = encodeURIComponent(song.channel);
+            // Icon Move (Arrow Right) & Delete (Trash)
             pmSongList.innerHTML += `
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#09090b; padding:12px; border-radius:12px; margin-bottom:8px;">
                     <div style="flex:1; overflow:hidden; cursor:pointer;" onclick="playSongFromPlaylist('${song.videoId}', '${safeTitle}', '${safeChannel}')">
                         <div style="color:#fff; font-size:14px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${song.title}</div>
                         <div style="color:#777; font-size:12px; margin-top:4px;">${song.channel}</div>
                     </div>
-                    <div style="display:flex; gap:8px;">
-                        ${playlistName !== "Lagu Favorit" ? `<button onclick="promptMoveSong('${playlistName}', '${song.videoId}', '${safeTitle}', '${safeChannel}')" style="background:none; border:none; font-size:16px; cursor:pointer;" title="Pindah Playlist">➡️</button>` : ''}
-                        <button onclick="removeSongFromPlaylist('${playlistName}', '${song.videoId}')" style="background:none; border:none; color:#ef4444; font-size:18px; cursor:pointer;" title="Hapus Lagu">🗑️</button>
+                    <div style="display:flex; gap:14px; align-items:center; margin-left:10px;">
+                        ${playlistName !== "Lagu Favorit" ? `<button onclick="promptMoveSong('${playlistName}', '${song.videoId}', '${safeTitle}', '${safeChannel}')" style="background:none; border:none; color:#a1a1aa; cursor:pointer; padding:0; display:flex;" title="Pindah Playlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg></button>` : ''}
+                        <button onclick="removeSongFromPlaylist('${playlistName}', '${song.videoId}')" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0; display:flex;" title="Hapus Lagu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     </div>
                 </div>`;
         });
@@ -175,7 +179,6 @@ function closePlaylistManager() {
     if (pm) pm.style.display = 'none';
 }
 
-// LOGIKA BARU: PLAY, RENAME, & DELETE PLAYLIST
 function playEntirePlaylist(playlistName, shuffle = false) {
     let songs = [...allPlaylists[playlistName]];
     if (songs.length === 0) return;
@@ -187,13 +190,10 @@ function playEntirePlaylist(playlistName, shuffle = false) {
         }
     }
 
-    playHistory = songs;
-    historyIndex = 0;
+    playHistory = songs; historyIndex = 0;
     const firstSong = playHistory[0];
     
-    const sr = document.getElementById('searchResults');
-    if(sr) sr.style.display = 'none';
-    
+    const sr = document.getElementById('searchResults'); if(sr) sr.style.display = 'none';
     loadSongToPlayer(firstSong.videoId, firstSong.title, firstSong.channel);
     closePlaylistManager();
 }
@@ -203,8 +203,7 @@ async function renamePlaylist(oldName) {
     if (!newName || newName === oldName) return;
     if (allPlaylists[newName]) return alert("Nama playlist sudah dipakai!");
 
-    allPlaylists[newName] = allPlaylists[oldName];
-    delete allPlaylists[oldName];
+    allPlaylists[newName] = allPlaylists[oldName]; delete allPlaylists[oldName];
     renderPlaylistGrid(); closePlaylistManager();
 
     await fetch(API_URL, {
@@ -219,7 +218,7 @@ async function deleteEntirePlaylist(playlistName) {
         renderPlaylistGrid(); closePlaylistManager();
         await fetch(API_URL, {
             method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playlistName }) // Gak ngirim videoId = hapus semua
+            body: JSON.stringify({ playlistName }) 
         });
     }
 }
@@ -241,18 +240,13 @@ async function removeSongFromPlaylist(playlistName, videoId) {
     }
 }
 
-// LOGIKA BARU: PINDAH LAGU (MOVE)
 let moveData = null;
 function promptMoveSong(playlistName, videoId, safeTitle, safeChannel) {
     moveData = { source: playlistName, song: { videoId, title: decodeURIComponent(safeTitle), channel: decodeURIComponent(safeChannel) } };
-    
-    // Kita "bajak" modal tambah playlist buat jadi modal pindah
     const saveModal = document.getElementById('saveModal');
     saveModal.querySelector('h3').innerText = 'Pindah ke Playlist';
     
-    const savePlaylistList = document.getElementById('savePlaylistList');
-    savePlaylistList.innerHTML = '';
-
+    const savePlaylistList = document.getElementById('savePlaylistList'); savePlaylistList.innerHTML = '';
     for (const pName in allPlaylists) {
         if (pName === playlistName || pName === "Lagu Favorit") continue;
         savePlaylistList.innerHTML += `
@@ -262,7 +256,7 @@ function promptMoveSong(playlistName, videoId, safeTitle, safeChannel) {
             </div>`;
     }
     
-    document.getElementById('newPlaylistInput').style.display = 'none'; // Sembunyiin input buat baru
+    document.getElementById('newPlaylistInput').style.display = 'none'; 
     saveModal.style.display = 'flex';
 }
 
@@ -270,7 +264,6 @@ async function executeMove(targetPlaylist) {
     if (!moveData) return;
     const { source, song } = moveData;
 
-    // 1. Tambah ke playlist baru
     if (!allPlaylists[targetPlaylist].some(s => s.videoId === song.videoId)) {
         allPlaylists[targetPlaylist].push(song);
         await fetch(API_URL, {
@@ -279,7 +272,6 @@ async function executeMove(targetPlaylist) {
         });
     }
 
-    // 2. Hapus dari playlist lama
     allPlaylists[source] = allPlaylists[source].filter(s => s.videoId !== song.videoId);
     await fetch(API_URL, {
         method: 'DELETE', headers: { 'Content-Type': 'application/json' },
