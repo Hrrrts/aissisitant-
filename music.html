@@ -58,7 +58,10 @@
         <div class="fp-header">
             <button class="nav-btn" onclick="closeFullPlayer()">↓</button>
             <span style="font-size:11px; font-weight:bold; letter-spacing:1px; color:#aaa;">SEDANG DIPUTAR</span>
-            <button class="nav-btn" onclick="addToPlaylist()" title="Tambah ke Playlist">➕</button>
+            <button class="nav-btn" onclick="addToPlaylist()" title="Tambah ke Playlist">
+                <!-- Tombol Plus Baru (SVG) -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
         </div>
 
         <div class="album-art">
@@ -66,11 +69,14 @@
         </div>
         
         <div class="song-info-container">
-            <div style="flex: 1; text-align: left;">
+            <div class="song-info-text">
                 <p class="song-title" id="fullTitle">Belum ada lagu</p>
                 <p class="song-artist" id="fullArtist">-</p>
             </div>
-            <button id="likeBtn" class="like-btn" onclick="toggleLike()">♡</button>
+            <button id="likeBtn" class="like-btn" onclick="toggleLike()">
+                <!-- Tombol Love Baru (SVG) -->
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
         </div>
         
         <div class="progress-container">
@@ -90,7 +96,7 @@
         </div>
     </div>
 
-    <!-- MODAL SIMPAN LAGU KE PLAYLIST -->
+    <!-- MODALS TETAP SAMA -->
     <div id="saveModal" style="display:none; z-index:9999; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; backdrop-filter:blur(5px);">
         <div style="background:#18181b; padding:24px; border-radius:20px; width:80%; max-width:320px; border:1px solid #27272a;">
             <h3 style="margin-top:0; color:#fff; font-size:18px;">Pilih Playlist</h3>
@@ -104,20 +110,18 @@
         </div>
     </div>
 
-    <!-- MODAL MANAJEMEN PLAYLIST -->
     <div id="playlistManagerModal" style="display:none; z-index:9999; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:flex-end; backdrop-filter:blur(5px);">
         <div style="background:#18181b; padding:24px; border-radius:24px 24px 0 0; width:100%; max-height:80vh; border-top:1px solid #27272a; box-sizing:border-box; display:flex; flex-direction:column; animation: slideUp 0.3s ease;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3 id="pmTitle" style="margin:0; color:#fff; font-size:20px;">Nama Playlist</h3>
                 <button onclick="closePlaylistManager()" style="background:none; border:none; color:#a1a1aa; font-size:28px; cursor:pointer;">&times;</button>
             </div>
-            <div id="pmSongList" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; padding-bottom:20px;">
-            </div>
+            <div id="pmSongList" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; padding-bottom:20px;"></div>
         </div>
     </div>
-    <style>@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }</style>
     
-    <div id="playerContainer" style="display: none;"></div>
+    <!-- FIX YOUTUBE CONTAINER: Diumpetin di pojok layar, BUKAN display none -->
+    <div id="playerContainer" style="position: absolute; width: 1px; height: 1px; top: -9999px; left: -9999px; overflow: hidden;"></div>
 
     <div class="bottom-nav">
         <a href="index.html" class="nav-item">
@@ -138,7 +142,8 @@
         </a>
     </div>
 
-    <!-- INI YANG BIKIN JALAN: Manggil 4 file JS yang udah kita pecah! -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
     <script src="js/music-state.js"></script>
     <script src="js/music-player.js"></script>
     <script src="js/music-search.js"></script>
