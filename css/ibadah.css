@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
+.top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; }
+.back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+.title-header { margin: 0 auto; font-size: 15px; font-weight: 700; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+
+.date-display { text-align: center; font-size: 14px; color: #a1a1aa; margin-bottom: 30px; letter-spacing: 1px; font-weight: 600;}
+
+/* Tema Midnight Colornote */
+.section-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 20px;}
+.section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin: 0 0 15px 0; display: flex; align-items: center; justify-content: space-between;}
+
+/* Grid Tombol Waktu Salat */
+.grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+.track-btn { background: #09090b; border: 1px solid #27272a; color: #a1a1aa; padding: 15px 5px; border-radius: 12px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
+.track-btn svg { width: 20px; height: 20px; stroke: #a1a1aa; transition: 0.2s; }
+
+/* State Tombol: Loading & Active */
+.track-btn.syncing { border-color: #fbbf24; color: #fbbf24; opacity: 0.8; pointer-events: none; animation: pulse 1s infinite alternate; }
+.track-btn.syncing svg { stroke: #fbbf24; }
+
+.track-btn.active { background: rgba(74, 222, 128, 0.1); border-color: #4ade80; color: #4ade80; }
+.track-btn.active svg { stroke: #4ade80; }
+.track-btn:active { transform: scale(0.95); }
+
+@keyframes pulse {
+    from { box-shadow: 0 0 0px #fbbf24; }
+    to { box-shadow: 0 0 10px #fbbf24; }
+}
+
+/* AI Assistant Box */
+.ai-box { 
+    background: #09090b; 
+    border: 1px solid #27272a; 
+    padding: 16px; 
+    border-radius: 12px; 
+    font-size: 13px; 
+    color: #a1a1aa; 
+    margin-bottom: 15px; 
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ai-header { display: flex; align-items: center; gap: 8px; color: #fbbf24; font-weight: 700; font-size: 14px; }
+.ai-header svg { width: 18px; height: 18px; stroke: #fbbf24; }
+.ai-text strong { color: #fff; }
+
+/* Tombol Link Quran */
+.btn-quran-link {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    transition: 0.2s;
+}
+.btn-quran-link:active { transform: scale(0.97); background: rgba(251, 191, 36, 0.2); }
+
+/* Murojaah Input */
+.input-box { width: 100%; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; box-sizing: border-box; resize: none; margin-bottom: 10px; font-family: inherit;}
+.input-box:focus { border-color: #fbbf24; }
+.btn-save { background: #fbbf24; color: #000; border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-family: inherit;}
+.btn-save:active { transform: scale(0.95); }
+.btn-save:disabled { background: #3f3f46; color: #a1a1aa; cursor: not-allowed; }
+
+/* Histori Singkat */
+.history-list { margin-top: 15px; display: flex; flex-direction: column; gap: 10px;}
+.h-item { background: #09090b; padding: 12px; border-radius: 10px; border: 1px solid #27272a; display: flex; justify-content: space-between; align-items: center;}
+.h-date { font-size: 13px; color: #fff; font-weight: 700;}
+.h-stats { font-size: 12px; color: #a1a1aa;}
