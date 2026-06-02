@@ -38,9 +38,41 @@
             to { box-shadow: 0 0 10px #fbbf24; }
         }
 
-        /* AI Assistant Box */
-        .ai-box { background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; padding: 12px 15px; border-radius: 8px; font-size: 13px; color: #e4e4e7; margin-bottom: 15px; line-height: 1.5; }
-        .ai-box strong { color: #fbbf24; }
+        /* AI Assistant Box - REDESIGNED */
+        .ai-box { 
+            background: #09090b; 
+            border: 1px solid #27272a; 
+            padding: 16px; 
+            border-radius: 12px; 
+            font-size: 13px; 
+            color: #a1a1aa; 
+            margin-bottom: 15px; 
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .ai-header { display: flex; align-items: center; gap: 8px; color: #fbbf24; font-weight: 700; font-size: 14px; }
+        .ai-header svg { width: 18px; height: 18px; stroke: #fbbf24; }
+        .ai-text strong { color: #fff; }
+        
+        /* Tombol Link Quran */
+        .btn-quran-link {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-quran-link:active { transform: scale(0.97); background: rgba(251, 191, 36, 0.2); }
 
         /* Murojaah Input */
         .input-box { width: 100%; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; box-sizing: border-box; resize: none; margin-bottom: 10px; font-family: inherit;}
@@ -118,10 +150,12 @@
     <div class="section-card">
         <h3 class="section-title">Murojaah / Tilawah</h3>
         
-        <!-- Pesan AI Rekomendasi Target -->
         <div class="ai-box" id="aiMessage">
-            <strong>🤖 Ais Assistant:</strong><br>
-            Memuat rekomendasi murojaah hari ini...
+            <div class="ai-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                Ais Assistant
+            </div>
+            <div class="ai-text">Memuat rekomendasi murojaah hari ini...</div>
         </div>
 
         <textarea id="murojaahInput" class="input-box" rows="2" placeholder="Cth: Selesai baca Surah Al-Mulk ayat 1-30"></textarea>
@@ -143,30 +177,44 @@
 
         let todayData = { solat: {}, sunnah: {}, murojaah: '' };
 
-        // ALGORITMA AI SMART TARGET MUROJAAH
+        // ALGORITMA AI SMART TARGET MUROJAAH DENGAN LINK
         function generateAITarget() {
+            // Pasangan target teks dan URL spesifik ke quran.com
             const targets = [
-                "Surah Al-Mulk (Tabarak) full ayat 1-30",
-                "Surah Ar-Rahman ayat 1-40",
-                "Surah Al-Waqi'ah ayat 1-50",
-                "Surah Al-Kahf ayat 1-15",
-                "Juz 30: Surah An-Naba s/d An-Naziat",
-                "Surah Yasin ayat 1-40",
-                "Surah As-Sajdah ayat 1-30",
-                "Juz 29: Surah Al-Mulk s/d Al-Qalam",
-                "Surah Luqman ayat 1-20",
-                "Murojaah Juz Amma (Bebas pilih 3 Surah pendek)"
+                { text: "Surah Al-Mulk (Tabarak) full", url: "https://quran.com/67" },
+                { text: "Surah Ar-Rahman ayat 1-40", url: "https://quran.com/55/1-40" },
+                { text: "Surah Al-Waqi'ah ayat 1-50", url: "https://quran.com/56/1-50" },
+                { text: "Surah Al-Kahf ayat 1-15", url: "https://quran.com/18/1-15" },
+                { text: "Surah An-Naba s/d An-Naziat", url: "https://quran.com/78" },
+                { text: "Surah Yasin ayat 1-40", url: "https://quran.com/36/1-40" },
+                { text: "Surah As-Sajdah ayat 1-30", url: "https://quran.com/32" },
+                { text: "Surah Al-Qalam (Juz 29)", url: "https://quran.com/68" },
+                { text: "Surah Luqman ayat 1-20", url: "https://quran.com/31/1-20" },
+                { text: "Surah Al-Insan full", url: "https://quran.com/76" }
             ];
             
-            // Logika Hashing agar target berbeda tiap hari, tapi sama jika dibuka seharian
             const dateStr = now.toDateString();
             let hash = 0;
             for (let i = 0; i < dateStr.length; i++) {
                 hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
             }
             const index = Math.abs(hash) % targets.length;
+            const target = targets[index];
             
-            document.getElementById('aiMessage').innerHTML = `<strong>🤖 Ais Assistant:</strong><br>Halo Haris! Rekomendasi jadwal murojaah kamu hari ini adalah menyelesaikan <strong>${targets[index]}</strong>. Semangat ya!`;
+            const bookIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`;
+
+            document.getElementById('aiMessage').innerHTML = `
+                <div class="ai-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    Ais Assistant
+                </div>
+                <div class="ai-text">
+                    Halo Haris! Rekomendasi jadwal murojaah kamu hari ini adalah menyelesaikan <strong>${target.text}</strong>. Semangat ya!
+                </div>
+                <a href="${target.url}" target="_blank" class="btn-quran-link">
+                    ${bookIcon} Buka Al-Quran
+                </a>
+            `;
         }
         generateAITarget();
 
@@ -211,14 +259,12 @@
         async function toggleTrack(type, key) {
             const btn = document.getElementById('btn-' + key);
             
-            // Cegah double klik kalau lagi proses nyimpan
             if (btn.classList.contains('syncing')) return; 
 
             if(!todayData[type]) todayData[type] = {};
             const isCurrentlyDone = todayData[type][key] || false;
             const newValue = !isCurrentlyDone;
             
-            // 1. Tampilkan state SYNCING (Warna Emas / Berkedip)
             btn.classList.add('syncing');
             btn.classList.remove('active');
 
@@ -231,17 +277,14 @@
 
                 if (!res.ok) throw new Error('Gagal dari database');
 
-                // 2. Berhasil disimpan di DB -> Ubah ke status akhir (Hijau / Default)
                 todayData[type][key] = newValue;
                 btn.classList.remove('syncing');
                 if(newValue) {
                     btn.classList.add('active');
                 }
             } catch (e) {
-                // 3. Gagal menyambung -> Batalkan efek
                 btn.classList.remove('syncing');
                 alert('Jaringan tidak stabil, gagal menyimpan ke database.');
-                // Kembalikan ke state aslinya jika gagal
                 if(isCurrentlyDone) btn.classList.add('active'); 
             }
         }
