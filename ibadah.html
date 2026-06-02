@@ -5,37 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ais Ibadah</title>
     <style>
-        body { background-color: #000000; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+        
+        body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; overflow-x: hidden;}
         .top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; }
         .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
-        .title-header { margin: 0 auto; font-size: 15px; font-weight: 600; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
+        .title-header { margin: 0 auto; font-size: 15px; font-weight: 700; color: #ffffff; padding-right: 24px; letter-spacing: 0.5px; text-transform: uppercase;}
         
-        .date-display { text-align: center; font-size: 14px; color: #888; margin-bottom: 30px; letter-spacing: 1px; font-weight: 600;}
+        .date-display { text-align: center; font-size: 14px; color: #a1a1aa; margin-bottom: 30px; letter-spacing: 1px; font-weight: 600;}
         
-        .section-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 20px;}
-        .section-title { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin: 0 0 15px 0; display: flex; align-items: center; justify-content: space-between;}
+        /* Tema Midnight Colornote */
+        .section-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 20px;}
+        .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin: 0 0 15px 0; display: flex; align-items: center; justify-content: space-between;}
         
         /* Grid Tombol Waktu Salat */
         .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         
-        .track-btn { background: #0a0a0a; border: 1px solid #333; color: #888; padding: 15px 5px; border-radius: 12px; text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
-        .track-btn svg { width: 20px; height: 20px; stroke: #555; }
-        .track-btn.active { background: #1a2e1a; border-color: #4ade80; color: #4ade80; }
+        .track-btn { background: #09090b; border: 1px solid #27272a; color: #a1a1aa; padding: 15px 5px; border-radius: 12px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
+        .track-btn svg { width: 20px; height: 20px; stroke: #a1a1aa; transition: 0.2s; }
+        
+        /* State Tombol: Loading & Active */
+        .track-btn.syncing { border-color: #fbbf24; color: #fbbf24; opacity: 0.8; pointer-events: none; animation: pulse 1s infinite alternate; }
+        .track-btn.syncing svg { stroke: #fbbf24; }
+        
+        .track-btn.active { background: rgba(74, 222, 128, 0.1); border-color: #4ade80; color: #4ade80; }
         .track-btn.active svg { stroke: #4ade80; }
         .track-btn:active { transform: scale(0.95); }
 
+        @keyframes pulse {
+            from { box-shadow: 0 0 0px #fbbf24; }
+            to { box-shadow: 0 0 10px #fbbf24; }
+        }
+
+        /* AI Assistant Box */
+        .ai-box { background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; padding: 12px 15px; border-radius: 8px; font-size: 13px; color: #e4e4e7; margin-bottom: 15px; line-height: 1.5; }
+        .ai-box strong { color: #fbbf24; }
+
         /* Murojaah Input */
-        .input-box { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; box-sizing: border-box; resize: none; margin-bottom: 10px; font-family: inherit;}
-        .input-box:focus { border-color: #555; }
-        .btn-save { background: #fff; color: #000; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s;}
+        .input-box { width: 100%; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; outline: none; box-sizing: border-box; resize: none; margin-bottom: 10px; font-family: inherit;}
+        .input-box:focus { border-color: #fbbf24; }
+        .btn-save { background: #fbbf24; color: #000; border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-family: inherit;}
         .btn-save:active { transform: scale(0.95); }
+        .btn-save:disabled { background: #3f3f46; color: #a1a1aa; cursor: not-allowed; }
 
         /* Histori Singkat */
         .history-list { margin-top: 15px; display: flex; flex-direction: column; gap: 10px;}
-        .h-item { background: #0a0a0a; padding: 12px; border-radius: 10px; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center;}
-        .h-date { font-size: 13px; color: #fff; font-weight: bold;}
-        .h-stats { font-size: 12px; color: #aaa;}
+        .h-item { background: #09090b; padding: 12px; border-radius: 10px; border: 1px solid #27272a; display: flex; justify-content: space-between; align-items: center;}
+        .h-date { font-size: 13px; color: #fff; font-weight: 700;}
+        .h-stats { font-size: 12px; color: #a1a1aa;}
     </style>
 </head>
 <body>
@@ -99,7 +117,14 @@
 
     <div class="section-card">
         <h3 class="section-title">Murojaah / Tilawah</h3>
-        <textarea id="murojaahInput" class="input-box" rows="2" placeholder="Cth: Surah Al-Mulk ayat 1-30"></textarea>
+        
+        <!-- Pesan AI Rekomendasi Target -->
+        <div class="ai-box" id="aiMessage">
+            <strong>🤖 Ais Assistant:</strong><br>
+            Memuat rekomendasi murojaah hari ini...
+        </div>
+
+        <textarea id="murojaahInput" class="input-box" rows="2" placeholder="Cth: Selesai baca Surah Al-Mulk ayat 1-30"></textarea>
         <button class="btn-save" id="btnSaveMurojaah" onclick="saveMurojaah()">Simpan Catatan</button>
     </div>
 
@@ -111,38 +136,59 @@
     </div>
 
     <script>
-        // Tampilkan Tanggal Hari Ini
+        // Set Tanggal Hari Ini
         const now = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('dateDisplay').innerText = now.toLocaleDateString('id-ID', options);
 
         let todayData = { solat: {}, sunnah: {}, murojaah: '' };
 
+        // ALGORITMA AI SMART TARGET MUROJAAH
+        function generateAITarget() {
+            const targets = [
+                "Surah Al-Mulk (Tabarak) full ayat 1-30",
+                "Surah Ar-Rahman ayat 1-40",
+                "Surah Al-Waqi'ah ayat 1-50",
+                "Surah Al-Kahf ayat 1-15",
+                "Juz 30: Surah An-Naba s/d An-Naziat",
+                "Surah Yasin ayat 1-40",
+                "Surah As-Sajdah ayat 1-30",
+                "Juz 29: Surah Al-Mulk s/d Al-Qalam",
+                "Surah Luqman ayat 1-20",
+                "Murojaah Juz Amma (Bebas pilih 3 Surah pendek)"
+            ];
+            
+            // Logika Hashing agar target berbeda tiap hari, tapi sama jika dibuka seharian
+            const dateStr = now.toDateString();
+            let hash = 0;
+            for (let i = 0; i < dateStr.length; i++) {
+                hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % targets.length;
+            
+            document.getElementById('aiMessage').innerHTML = `<strong>🤖 Ais Assistant:</strong><br>Halo Haris! Rekomendasi jadwal murojaah kamu hari ini adalah menyelesaikan <strong>${targets[index]}</strong>. Semangat ya!`;
+        }
+        generateAITarget();
+
         async function loadData() {
             try {
                 const res = await fetch('/api/ibadah');
+                if (!res.ok) throw new Error('Network response was not ok');
                 const data = await res.json();
                 
                 if(data.today) {
                     todayData = data.today;
-                    
-                    // Warnain tombol solat yg udah
                     for (const [key, value] of Object.entries(todayData.solat || {})) {
                         if(value) document.getElementById('btn-' + key).classList.add('active');
                     }
-                    
-                    // Warnain tombol sunnah yg udah
                     for (const [key, value] of Object.entries(todayData.sunnah || {})) {
                         if(value) document.getElementById('btn-' + key).classList.add('active');
                     }
-
-                    // Isi text murojaah
                     if(todayData.murojaah) {
                         document.getElementById('murojaahInput').value = todayData.murojaah;
                     }
                 }
 
-                // Render Histori
                 const list = document.getElementById('historyList');
                 if(data.history && data.history.length > 0) {
                     list.innerHTML = data.history.map(h => {
@@ -154,60 +200,77 @@
                         </div>`;
                     }).join('');
                 } else {
-                    list.innerHTML = '<p style="text-align:center; color:#555; font-size:12px;">Belum ada histori.</p>';
+                    list.innerHTML = '<p style="text-align:center; color:#a1a1aa; font-size:12px;">Belum ada histori.</p>';
                 }
             } catch (e) {
-                console.log('Error memuat data ibadah');
+                console.log('Error memuat data ibadah:', e);
+                document.getElementById('historyList').innerHTML = '<p style="text-align:center; color:#ef4444; font-size:12px;">Gagal memuat data dari server.</p>';
             }
         }
 
         async function toggleTrack(type, key) {
             const btn = document.getElementById('btn-' + key);
-            // Toggle state di memori sementara (kalau false jadi true, kalau true jadi false)
+            
+            // Cegah double klik kalau lagi proses nyimpan
+            if (btn.classList.contains('syncing')) return; 
+
             if(!todayData[type]) todayData[type] = {};
             const isCurrentlyDone = todayData[type][key] || false;
             const newValue = !isCurrentlyDone;
             
-            // Langsung ubah warna tombol biar terasa responsif
-            if (newValue) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-            
-            todayData[type][key] = newValue;
+            // 1. Tampilkan state SYNCING (Warna Emas / Berkedip)
+            btn.classList.add('syncing');
+            btn.classList.remove('active');
 
-            // Simpan ke MongoDB di background
             try {
-                await fetch('/api/ibadah', {
+                const res = await fetch('/api/ibadah', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type, key, value: newValue })
                 });
+
+                if (!res.ok) throw new Error('Gagal dari database');
+
+                // 2. Berhasil disimpan di DB -> Ubah ke status akhir (Hijau / Default)
+                todayData[type][key] = newValue;
+                btn.classList.remove('syncing');
+                if(newValue) {
+                    btn.classList.add('active');
+                }
             } catch (e) {
-                alert('Koneksi terputus, gagal menyimpan ke cloud.');
-                // Kembalikan warna kalau gagal
-                if(!newValue) btn.classList.add('active'); else btn.classList.remove('active');
-                todayData[type][key] = isCurrentlyDone;
+                // 3. Gagal menyambung -> Batalkan efek
+                btn.classList.remove('syncing');
+                alert('Jaringan tidak stabil, gagal menyimpan ke database.');
+                // Kembalikan ke state aslinya jika gagal
+                if(isCurrentlyDone) btn.classList.add('active'); 
             }
         }
 
         async function saveMurojaah() {
             const val = document.getElementById('murojaahInput').value;
             const btn = document.getElementById('btnSaveMurojaah');
+            
             btn.innerText = 'Menyimpan...';
+            btn.disabled = true;
 
             try {
-                await fetch('/api/ibadah', {
+                const res = await fetch('/api/ibadah', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'murojaah', key: 'text', value: val })
                 });
+                
+                if (!res.ok) throw new Error('Database error');
+
                 btn.innerText = 'Tersimpan ✓';
-                setTimeout(() => { btn.innerText = 'Simpan Catatan'; }, 2000);
+                setTimeout(() => { 
+                    btn.innerText = 'Simpan Catatan'; 
+                    btn.disabled = false;
+                }, 2000);
             } catch (e) {
                 alert('Gagal menyimpan catatan murojaah.');
                 btn.innerText = 'Simpan Catatan';
+                btn.disabled = false;
             }
         }
 
