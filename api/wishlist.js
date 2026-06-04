@@ -16,16 +16,14 @@ module.exports = async (req, res) => {
             res.status(200).json(items);
 
         } else if (req.method === 'POST') {
-            // SUB-FITUR: AUTO FETCH METADATA LINK
             if (req.body.action === 'scrape') {
                 const { url } = req.body;
                 try {
                     const response = await fetch(url, {
-                        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36' }
+                        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
                     });
                     const html = await response.text();
                     
-                    // Regex pencari Open Graph Meta Tags (Title & Image)
                     const titleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) || 
                                        html.match(/<title>([^<]+)<\/title>/i);
                     const imageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
@@ -40,17 +38,12 @@ module.exports = async (req, res) => {
                 }
             }
 
-            // SIMPAN DATA WISHLIST BARU
             const { title, link, image, reason, price, isDiscount, discountPrice } = req.body;
             if (!title || !price) return res.status(400).json({ error: 'Data tidak lengkap' });
 
             const newItem = {
-                title,
-                link: link || "#",
-                image: image || "",
-                reason: reason || "",
-                price: parseFloat(price),
-                isDiscount: isDiscount || false,
+                title, link: link || "#", image: image || "", reason: reason || "",
+                price: parseFloat(price), isDiscount: isDiscount || false,
                 discountPrice: discountPrice ? parseFloat(discountPrice) : 0,
                 createdAt: new Date()
             };

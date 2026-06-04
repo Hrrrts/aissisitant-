@@ -20,7 +20,6 @@ function setupDiscountToggle() {
     }
 }
 
-// 1. AUTO FETCH DETAIL LINK (NAME & IMAGE PREVIEW)
 async function fetchLinkMetadata() {
     const urlInput = document.getElementById('w-link');
     const url = urlInput.value.trim();
@@ -28,31 +27,20 @@ async function fetchLinkMetadata() {
 
     const btn = document.getElementById('btnCheckLink');
     const origText = btn.innerText;
-    btn.innerText = "Checking..."; btn.disabled = true;
+    btn.innerText = "Check..."; btn.disabled = true;
 
     try {
-        const res = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'scrape', url })
-        });
+        const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'scrape', url }) });
         const data = await res.json();
         
         if (data.success && data.title) {
             document.getElementById('w-title').value = data.title;
             if(data.image) document.getElementById('w-image').value = data.image;
-        } else {
-            // Anti-bot marketplace aktif -> bypass ke pengisian manual tenang saja
-            console.log("Situs memblokir robot scraper otomatis. Silakan isi detail manual.");
         }
-    } catch (e) {
-        console.log("Scraper offline, beralih ke input manual.");
-    } finally {
-        btn.innerText = origText; btn.disabled = false;
-    }
+    } catch (e) { console.log("Gagal memuat detail otomatis"); } 
+    finally { btn.innerText = origText; btn.disabled = false; }
 }
 
-// 2. SIMPAN DATA KE MONGO
 async function saveWishlistItem() {
     const title = document.getElementById('w-title').value.trim();
     const link = document.getElementById('w-link').value.trim();
@@ -63,31 +51,25 @@ async function saveWishlistItem() {
     const discountPrice = document.getElementById('w-discountPrice').value.trim();
 
     if (!title || !price) return alert("Nama barang dan harga wajib diisi!");
+    const btn = document.getElementById('btnSaveWish');
+    btn.innerText = 'Menyimpan...'; btn.disabled = true;
 
     try {
         await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, link, image, reason, price, isDiscount, discountPrice })
         });
         
-        // Reset Form
-        document.getElementById('w-title').value = '';
-        document.getElementById('w-link').value = '';
-        document.getElementById('w-image').value = '';
-        document.getElementById('w-reason').value = '';
-        document.getElementById('w-price').value = '';
-        document.getElementById('w-isDiscount').checked = false;
-        document.getElementById('w-discountPrice').value = '';
-        document.getElementById('discountPriceGroup').style.style = 'none';
+        document.getElementById('w-title').value = ''; document.getElementById('w-link').value = '';
+        document.getElementById('w-image').value = ''; document.getElementById('w-reason').value = '';
+        document.getElementById('w-price').value = ''; document.getElementById('w-isDiscount').checked = false;
+        document.getElementById('w-discountPrice').value = ''; document.getElementById('discountPriceGroup').style.display = 'none';
 
         loadWishlistData();
-    } catch (e) {
-        alert("Gagal menyimpan item.");
-    }
+    } catch (e) { alert("Gagal menyimpan item."); }
+    finally { btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> TAMBAHKAN IMPIAN`; btn.disabled = false; }
 }
 
-// 3. LOAD DATA & RENDER CARDS GRID
 async function loadWishlistData() {
     const grid = document.getElementById('wishlistGrid');
     grid.innerHTML = '<p style="color:#a1a1aa; font-size:13px; grid-column:span 2; text-align:center;">Membuka daftar keinginan...</p>';
@@ -97,8 +79,7 @@ async function loadWishlistData() {
         wishlistItems = await res.json();
 
         if (wishlistItems.length === 0) {
-            grid.innerHTML = '<p style="color:#52525b; font-size:13px; grid-column:span 2; text-align:center;">Belum ada impian terdaftar.</p>';
-            return;
+            grid.innerHTML = '<p style="color:#52525b; font-size:13px; grid-column:span 2; text-align:center;">Belum ada impian terdaftar.</p>'; return;
         }
 
         grid.innerHTML = wishlistItems.map(item => {
@@ -121,17 +102,14 @@ async function loadWishlistData() {
                 </div>
             `;
         }).join('');
-    } catch (e) {
-        grid.innerHTML = '<p style="color:#ef4444; font-size:13px; grid-column:span 2; text-align:center;">Gagal memuat data cloud.</p>';
-    }
+    } catch (e) { grid.innerHTML = '<p style="color:#ef4444; font-size:13px; grid-column:span 2; text-align:center;">Gagal memuat data.</p>'; }
 }
 
-// 4. INTERACTIVE MODAL BOX SYSTEM
 function openDetailModal(id) {
     const item = wishlistItems.find(i => i._id === id);
     if (!item) return;
 
-    const modal = document.getElementById('detailModal');
+    document.getElementById('detailModal').style.display = 'flex';
     const hasImg = item.image && item.image.startsWith('http');
     
     document.getElementById('m-img').style.display = hasImg ? 'block' : 'none';
@@ -143,31 +121,18 @@ function openDetailModal(id) {
     const priceArea = document.getElementById('m-price-area');
     if (item.isDiscount) {
         priceArea.innerHTML = `<span class="price-tag" style="font-size:16px;">${formatRupiah(item.discountPrice)}</span> <span class="old-price-strike" style="font-size:13px; margin-left:8px;">${formatRupiah(item.price)}</span> <span style="color:#ef4444; font-weight:700; font-size:12px; margin-left:8px;">(DISKON)</span>`;
-    } else {
-        priceArea.innerHTML = `<span class="price-tag" style="font-size:16px;">${formatRupiah(item.price)}</span>`;
-    }
+    } else { priceArea.innerHTML = `<span class="price-tag" style="font-size:16px;">${formatRupiah(item.price)}</span>`; }
 
     document.getElementById('m-link-btn').href = item.link && item.link.startsWith('http') ? item.link : '#';
     document.getElementById('m-delete-btn').onclick = () => deleteWishItem(item._id);
-
-    modal.style.display = 'flex';
 }
 
-function closeDetailModal() {
-    document.getElementById('detailModal').style.display = 'none';
-}
+function closeDetailModal() { document.getElementById('detailModal').style.display = 'none'; }
 
 async function deleteWishItem(id) {
     if (!confirm("Hapus barang ini dari wishlist?")) return;
     try {
-        await fetch(API_URL, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
-        });
-        closeDetailModal();
-        loadWishlistData();
-    } catch (e) {
-        alert("Gagal menghapus.");
-    }
+        await fetch(API_URL, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        closeDetailModal(); loadWishlistData();
+    } catch (e) { alert("Gagal menghapus."); }
 }

@@ -20,17 +20,17 @@
         <span class="add-card-title">Tambah Keinginan</span>
         
         <div class="input-group-btn">
-            <input type="text" id="w-link" class="input-wish" placeholder="Tempel link produk (Shopee, online shop, dll)...">
+            <input type="text" id="w-link" class="input-wish" placeholder="Tempel link produk (Shopee, Tokped, dll)...">
             <button id="btnCheckLink" class="btn-check-link" onclick="fetchLinkMetadata()">Cek Link</button>
         </div>
         
         <input type="text" id="w-title" class="input-wish" placeholder="Nama Barang">
-        <input type="text" id="w-image" class="input-wish" placeholder="URL Gambar Produk (Otomatis/Manual)">
+        <input type="text" id="w-image" class="input-wish" placeholder="URL Gambar Produk (Bisa Otomatis/Manual)">
         <input type="text" id="w-reason" class="input-wish" placeholder="Kenapa harus beli barang ini?">
         
-        <div class="form-row" style="margin-bottom:0;">
-            <input type="number" id="w-price" class="input-wish" placeholder="Harga Asli">
-            <div class="toggle-wrapper" style="justify-content: center;">
+        <div class="form-row" style="margin-bottom:0; display:flex; gap:10px;">
+            <input type="number" id="w-price" class="input-wish" placeholder="Harga Asli" style="flex:1;">
+            <div class="toggle-wrapper" style="margin:0;">
                 <input type="checkbox" id="w-isDiscount" style="accent-color:#fbbf24; width:16px; height:16px;">
                 <label for="w-isDiscount">Lagi Diskon</label>
             </div>
@@ -40,14 +40,13 @@
             <input type="number" id="w-discountPrice" class="input-wish" placeholder="Harga Diskon">
         </div>
 
-        <button class="btn-primary-gold" onclick="saveWishlistItem()" style="margin-top:5px;">
+        <button id="btnSaveWish" class="btn-primary-gold" onclick="saveWishlistItem()" style="margin-top:5px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             TAMBAHKAN IMPIAN
         </button>
     </div>
 
-    <div class="wishlist-grid" id="wishlistGrid">
-        </div>
+    <div class="wishlist-grid" id="wishlistGrid"></div>
 
     <div id="detailModal" class="modal-overlay" onclick="closeDetailModal()">
         <div class="modal-content-box" onclick="event.stopPropagation()">

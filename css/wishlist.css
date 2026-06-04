@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
 body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; padding-bottom: 100px; overflow-x: hidden; }
 .top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; justify-content: space-between; }
 .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
 .title-header { font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; margin: 0;}
 
-/* Form Tambah Section */
 .add-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 12px; }
 .add-card-title { font-size: 14px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; }
 .input-group-btn { display: flex; gap: 8px; }
@@ -11,7 +12,6 @@ body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta San
 .input-wish:focus { border-color: #fbbf24; }
 .btn-check-link { background: #27272a; color: #fff; border: 1px solid #3f3f46; padding: 0 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
-/* Grid System Items */
 .wishlist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 @media(min-width: 768px) { .wishlist-grid { grid-template-columns: repeat(4, 1fr); } }
 
@@ -22,15 +22,12 @@ body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta San
 .wish-info { padding: 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .wish-item-title { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
 
-/* Badges & Prices */
 .price-tag { font-size: 13px; font-weight: 700; color: #fbbf24; }
 .old-price-strike { font-size: 11px; color: #71717a; text-decoration: line-through; }
 .discount-badge { position: absolute; top: 8px; left: 8px; background: #ef4444; color: #fff; font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* Modern Modal Design */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-.modal-content-box { background: #18181b; width: 100%; max-height: 85vh; border-top: 1px solid #27272a; border-radius: 24px 24px 0 0; padding: 24px; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; animation: slideUp 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94) forwards; }
-
+.modal-content-box { background: #18181b; width: 100%; max-height: 85vh; border-top: 1px solid #27272a; border-radius: 24px 24px 0 0; padding: 24px; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; animation: slideUp 0.3s forwards; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
 .modal-img-preview { width: 100%; aspect-ratio: 16/10; border-radius: 14px; object-fit: cover; background: #09090b; border: 1px solid #27272a; }
@@ -38,7 +35,6 @@ body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta San
 .modal-desc-box { background: #09090b; border: 1px solid #27272a; padding: 14px; border-radius: 12px; font-size: 13px; color: #a1a1aa; line-height: 1.5; }
 .modal-footer-actions { display: flex; gap: 12px; margin-top: 10px; }
 
-/* Custom Switch Toggle */
 .toggle-wrapper { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #a1a1aa; margin: 4px 0; }
 .btn-primary-gold { background: #fbbf24; color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; display: flex; justify-content: center; align-items: center; gap: 8px; flex: 1; text-decoration: none; text-align: center;}
 .btn-sec-dark { background: #27272a; color: #ef4444; border: 1px solid #3f3f46; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; justify-content: center; align-items: center; }
