@@ -30,7 +30,11 @@
             <input type="number" id="invQty" class="input-pekerjaan" placeholder="Qty">
         </div>
         <div class="form-full">
-            <input type="text" id="invKet" class="input-pekerjaan" placeholder="Keterangan (Opsional)">
+            <input type="text" id="invKet" class="input-pekerjaan" placeholder="Keterangan (Ketik atau pilih opsi di bawah)">
+            <div class="quick-ket-wrapper">
+                <button class="btn-quick-ket" onclick="setKet('buka baru')">buka baru</button>
+                <button class="btn-quick-ket" onclick="setKet('refill')">refill</button>
+            </div>
         </div>
         <button id="btnSimpanFixed" class="btn-simpan-fixed" onclick="saveFixedInventory()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>

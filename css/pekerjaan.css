@@ -15,9 +15,15 @@ body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta San
 
 /* Form Input Row */
 .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; }
-.form-full { width: 100%; margin-bottom: 12px; }
+.form-full { width: 100%; margin-bottom: 15px; }
 .input-pekerjaan { width: 100%; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; font-family: inherit; }
 .input-pekerjaan:focus { border-color: #fbbf24; }
+
+/* Quick Select Keterangan */
+.quick-ket-wrapper { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;}
+.btn-quick-ket { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; padding: 4px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 600;}
+.btn-quick-ket:active { background: #fbbf24; color: #000; border-color: #fbbf24; }
+
 .btn-simpan-fixed { width: 100%; background: #fbbf24; color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s;}
 .btn-simpan-fixed:active { transform: scale(0.97); }
 

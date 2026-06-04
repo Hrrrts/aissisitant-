@@ -54,6 +54,11 @@ function renderInventoryTable(logs) {
     }).join('');
 }
 
+// FUNGSI ISI KETERANGAN CEPAT
+function setKet(text) {
+    document.getElementById('invKet').value = text;
+}
+
 // Handler Simpan Log Fix
 async function saveFixedInventory() {
     const inputItem = document.getElementById('invItem');
@@ -91,7 +96,6 @@ function copyRekapWA() {
     const logs = allData.filter(item => item.category === "Inventory Log");
     if (logs.length === 0) return alert("Tidak ada data untuk direkap hari ini!");
 
-    // Set format tanggal ke huruf kecil semua (contoh: 04 juni 2026)
     const dateOptions = { day: '2-digit', month: 'long', year: 'numeric' };
     const dateStr = new Date().toLocaleDateString('id-ID', dateOptions).toLowerCase();
     
@@ -105,7 +109,6 @@ function copyRekapWA() {
         text += `- ${name}${qty}${ket}\n`;
     });
 
-    // Hilangkan baris baru terakhir agar tidak terlalu renggang saat di-paste
     text = text.trim();
 
     navigator.clipboard.writeText(text).then(() => {
