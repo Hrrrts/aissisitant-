@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; padding-bottom: 100px; overflow-x: hidden; }
+.top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; justify-content: space-between; }
+.back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+.title-header { font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; margin: 0;}
+
+/* Form Tambah Password */
+.add-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 12px; }
+.add-card-title { font-size: 14px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; display: flex; align-items: center; gap: 8px;}
+.input-vault { width: 100%; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; font-family: inherit; transition: 0.2s; }
+.input-vault:focus { border-color: #fbbf24; }
+.btn-save { background: #fbbf24; color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+.btn-save:active { transform: scale(0.97); }
+
+/* Grid Vault List */
+.vault-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+@media(min-width: 768px) { .vault-grid { grid-template-columns: 1fr 1fr; } }
+
+.vault-item { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: 0.2s; }
+.vault-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.vault-title { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
+.vault-username { font-size: 12px; color: #a1a1aa; margin-top: 4px; }
+
+/* Password Display Area */
+.password-area { display: flex; justify-content: space-between; align-items: center; background: #09090b; padding: 12px; border-radius: 10px; border: 1px solid #27272a; margin-top: 5px; }
+.password-text { font-family: monospace; font-size: 14px; color: #fbbf24; letter-spacing: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Action Buttons */
+.vault-actions { display: flex; gap: 10px; }
+.icon-btn { background: none; border: none; cursor: pointer; padding: 6px; display: flex; justify-content: center; align-items: center; color: #a1a1aa; border-radius: 6px; transition: 0.2s; }
+.icon-btn:hover { color: #fff; background: #27272a; }
+.icon-btn.copy:active { color: #4ade80; } /* Warna hijau pas diklik */
+.icon-btn.delete { color: #ef4444; }
+
+/* Toast Notif */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #4ade80; color: #000; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000; display: flex; align-items: center; gap: 8px;}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
