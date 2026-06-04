@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; padding-bottom: 100px; overflow-x: hidden; }
+.top-bar { display: flex; align-items: center; margin-bottom: 20px; margin-top: 10px; justify-content: space-between; }
+.back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+.title-header { font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; margin: 0;}
+
+/* Dynamic Workspace Grid */
+.workspace-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media(min-width: 768px) { .workspace-container { grid-template-columns: 1fr 1fr; } }
+
+/* Block / Board Styles */
+.work-block { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+.block-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; padding-bottom: 10px; }
+.block-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fbbf24; margin: 0; }
+
+/* Items List */
+.item-list { display: flex; flex-direction: column; gap: 10px; }
+.work-item { display: flex; align-items: center; justify-content: space-between; background: #09090b; padding: 12px; border-radius: 10px; border: 1px solid #27272a; transition: 0.2s; }
+.work-item.done { opacity: 0.5; }
+.work-item.done .item-text { text-decoration: line-through; color: #a1a1aa; }
+.item-left { display: flex; align-items: center; gap: 12px; flex: 1; overflow: hidden; cursor: pointer; }
+.item-text { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.2s; }
+
+/* Custom Checkbox */
+.checkbox { width: 18px; height: 18px; border: 2px solid #52525b; border-radius: 4px; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+.work-item.done .checkbox { background: #4ade80; border-color: #4ade80; }
+.checkbox svg { width: 12px; height: 12px; stroke: #000; opacity: 0; }
+.work-item.done .checkbox svg { opacity: 1; }
+
+.btn-delete { background: none; border: none; color: #ef4444; cursor: pointer; padding: 5px; display: flex; align-items: center; }
+
+/* Input Add New */
+.add-form { display: flex; gap: 8px; margin-top: auto; }
+.input-work { flex: 1; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; }
+.input-work:focus { border-color: #fbbf24; }
+.btn-add { background: #fbbf24; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+
+/* Global Add Button */
+.global-add { position: fixed; bottom: 80px; right: 20px; background: #fbbf24; color: #000; width: 50px; height: 50px; border-radius: 25px; border: none; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(251,191,36,0.3); display: flex; justify-content: center; align-items: center; z-index: 100;}
