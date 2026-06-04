@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ais Absen</title>
+    <link rel="stylesheet" href="css/absen.css">
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <h2 class="title-header">Attendance</h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
+
+    <div class="clock-card">
+        <div style="text-align: center;">
+            <p class="live-date" id="liveDate">Memuat tanggal...</p>
+            <p class="live-time" id="liveTime">00:00:00</p>
+        </div>
+        
+        <input type="text" id="inputLocation" class="input-loc" placeholder="Lokasi (Cth: Kantor, Cafe, Rumah)">
+        
+        <button id="btnAction" class="btn-action">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            CLOCK IN
+        </button>
+    </div>
+
+    <div class="stats-card">
+        <div class="stat-box">
+            <span class="stat-label">Total Jam (7 Hari)</span>
+            <span class="stat-value" id="weeklyTotal">0h 0m</span>
+        </div>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27272a" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+    </div>
+
+    <div class="history-section">
+        <h3 class="section-title">Riwayat Absen</h3>
+        <div class="h-list" id="historyList">
+            </div>
+    </div>
+
+    <script src="js/absen.js"></script>
+</body>
+</html>
