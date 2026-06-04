@@ -33,7 +33,7 @@ function renderInventoryTable(logs) {
         return;
     }
 
-    // Urutkan terbalik (paling baru di atas) sesuai perilaku PHP array_reverse
+    // Urutkan terbalik (paling baru di atas)
     const reversedLogs = [...logs].reverse();
 
     tbody.innerHTML = reversedLogs.map(log => {
@@ -86,21 +86,27 @@ async function saveFixedInventory() {
     }
 }
 
-// COPY REKAP WA DARI TABEL FIXED LOG
+// COPY REKAP WA FORMAT SIMPEL REQUESAN USER
 function copyRekapWA() {
     const logs = allData.filter(item => item.category === "Inventory Log");
     if (logs.length === 0) return alert("Tidak ada data untuk direkap hari ini!");
 
-    const dateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    let text = `📦 *LOG STATUS INVENTORI*\n📅 Tanggal: ${dateStr}\n\n`;
+    // Set format tanggal ke huruf kecil semua (contoh: 04 juni 2026)
+    const dateOptions = { day: '2-digit', month: 'long', year: 'numeric' };
+    const dateStr = new Date().toLocaleDateString('id-ID', dateOptions).toLowerCase();
+    
+    let text = `Diambil dari inventori ${dateStr}\n`;
 
-    logs.forEach((log, idx) => {
-        const jam = new Date(log.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        const ketStr = log.keterangan ? ` _(${log.keterangan})_` : '';
-        text += `• [${jam}] *${log.text.toUpperCase()}* ➔ *${log.qty}*${ketStr}\n`;
+    logs.forEach((log) => {
+        const name = log.text.toLowerCase();
+        const qty = log.qty ? ` ${log.qty}` : '';
+        const ket = log.keterangan ? `(${log.keterangan.toLowerCase()})` : '';
+        
+        text += `- ${name}${qty}${ket}\n`;
     });
 
-    text += `\n_Aissistant Auto-Generated_`;
+    // Hilangkan baris baru terakhir agar tidak terlalu renggang saat di-paste
+    text = text.trim();
 
     navigator.clipboard.writeText(text).then(() => {
         const toast = document.getElementById('workToast');
@@ -110,7 +116,7 @@ function copyRekapWA() {
     }).catch(() => { alert("Gagal menyalin."); });
 }
 
-// 2. RENDER SUB-BAGIAN KUSTOM BLOCKS (DYNAMIQUES)
+// 2. RENDER SUB-BAGIAN KUSTOM BLOCKS (DYNAMIC)
 function renderCustomWorkspaces() {
     const grid = document.getElementById('customWorkspaceGrid');
     grid.innerHTML = '';
