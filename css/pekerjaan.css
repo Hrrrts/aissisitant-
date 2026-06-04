@@ -5,36 +5,51 @@ body { background-color: #09090b; color: #ededed; font-family: 'Plus Jakarta San
 .back-btn { color: #ffffff; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
 .title-header { font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; margin: 0;}
 
-/* Dynamic Workspace Grid */
-.workspace-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
-@media(min-width: 768px) { .workspace-container { grid-template-columns: 1fr 1fr; } }
+/* --- DESIGN SECTION CARD FIXED (INVENTORY LOG) --- */
+.main-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+.card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.section-title-fixed { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin: 0; }
 
-/* Block / Board Styles */
-.work-block { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-.block-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; padding-bottom: 10px; }
-.block-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fbbf24; margin: 0; }
+.btn-wa-top { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
+.btn-wa-top:active { transform: scale(0.95); background: rgba(74, 222, 128, 0.2); }
 
-/* Items List */
-.item-list { display: flex; flex-direction: column; gap: 10px; }
-.work-item { display: flex; align-items: center; justify-content: space-between; background: #09090b; padding: 12px; border-radius: 10px; border: 1px solid #27272a; transition: 0.2s; }
-.work-item.done { opacity: 0.5; }
-.work-item.done .item-text { text-decoration: line-through; color: #a1a1aa; }
-.item-left { display: flex; align-items: center; gap: 12px; flex: 1; overflow: hidden; cursor: pointer; }
-.item-text { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.2s; }
+/* Form Input Row */
+.form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; }
+.form-full { width: 100%; margin-bottom: 12px; }
+.input-pekerjaan { width: 100%; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; font-family: inherit; }
+.input-pekerjaan:focus { border-color: #fbbf24; }
+.btn-simpan-fixed { width: 100%; background: #fbbf24; color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s;}
+.btn-simpan-fixed:active { transform: scale(0.97); }
 
-/* Custom Checkbox */
-.checkbox { width: 18px; height: 18px; border: 2px solid #52525b; border-radius: 4px; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
-.work-item.done .checkbox { background: #4ade80; border-color: #4ade80; }
-.checkbox svg { width: 12px; height: 12px; stroke: #000; opacity: 0; }
-.work-item.done .checkbox svg { opacity: 1; }
+/* Table Log Modern & Mobile Scrollable */
+.table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 10px; border: 1px solid #27272a; background: #09090b; }
+.table-log { width: 100%; border-collapse: collapse; min-width: 450px; text-align: left; }
+.table-log th { background: #141416; color: #a1a1aa; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 10px; border-bottom: 1px solid #27272a; }
+.table-log td { padding: 12px 10px; font-size: 13px; color: #fff; border-bottom: 1px solid #1f1f23; }
+.td-time { font-family: monospace; color: #a1a1aa; font-size: 11px; }
+.td-item { font-weight: 600; text-transform: uppercase; }
+.badge-qty-table { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.td-ket { color: #a1a1aa; font-size: 12px; }
+.btn-del-table { background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; display: flex; }
 
-.btn-delete { background: none; border: none; color: #ef4444; cursor: pointer; padding: 5px; display: flex; align-items: center; }
+/* --- DESIGN SECTION KUSTOM (DYNAMIC BLOCKS) --- */
+.sub-title-workspace { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin: 25px 0 15px 0; }
+.workspace-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media(min-width: 768px) { .workspace-grid { grid-template-columns: 1fr 1fr; } }
 
-/* Input Add New */
-.add-form { display: flex; gap: 8px; margin-top: auto; }
-.input-work { flex: 1; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; }
-.input-work:focus { border-color: #fbbf24; }
-.btn-add { background: #fbbf24; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.work-block { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.block-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; padding-bottom: 8px; }
+.block-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #fbbf24; margin: 0; }
+.item-list { display: flex; flex-direction: column; gap: 8px; }
+.custom-item { display: flex; align-items: center; justify-content: space-between; background: #09090b; padding: 10px; border-radius: 8px; border: 1px solid #27272a; font-size: 12px; }
+.custom-item.done { opacity: 0.4; }
+.custom-item.done span { text-decoration: line-through; }
 
-/* Global Add Button */
-.global-add { position: fixed; bottom: 80px; right: 20px; background: #fbbf24; color: #000; width: 50px; height: 50px; border-radius: 25px; border: none; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(251,191,36,0.3); display: flex; justify-content: center; align-items: center; z-index: 100;}
+.add-block-form { display: flex; gap: 6px; margin-top: auto; }
+.input-block-task { flex: 1; background: #09090b; border: 1px solid #27272a; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; outline: none; font-family: inherit; }
+.btn-add-task { background: #fbbf24; color: #000; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center;}
+
+/* Floating Add Button */
+.global-add { position: fixed; bottom: 30px; right: 20px; background: #fbbf24; color: #000; width: 50px; height: 50px; border-radius: 25px; border: none; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(251,191,36,0.3); display: flex; justify-content: center; align-items: center; z-index: 100;}
+.toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px); background: #4ade80; color: #000; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000; display: flex; align-items: center; gap: 8px;}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

@@ -16,10 +16,17 @@ module.exports = async (req, res) => {
             res.status(200).json(items);
 
         } else if (req.method === 'POST') {
-            const { category, text } = req.body;
+            const { category, text, qty, keterangan } = req.body;
             if (!category || !text) return res.status(400).json({error: 'Data tidak lengkap'});
             
-            const newItem = { category, text, isDone: false, createdAt: new Date() };
+            const newItem = { 
+                category, 
+                text, 
+                qty: qty || "", 
+                keterangan: keterangan || "", 
+                isDone: false, 
+                createdAt: new Date() 
+            };
             const result = await collection.insertOne(newItem);
             res.status(200).json({ success: true, id: result.insertedId, ...newItem });
             
