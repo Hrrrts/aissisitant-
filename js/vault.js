@@ -1,4 +1,4 @@
-const API_URL = '/api/vault';
+const API_URL = '/api/tools?type=vault';
 
 document.addEventListener("DOMContentLoaded", () => {
     loadVaultData();

@@ -1,4 +1,4 @@
-const API_URL = '/api/wishlist';
+const API_URL = '/api/tools?type=wishlist';
 let wishlistItems = [];
 
 document.addEventListener("DOMContentLoaded", () => {
